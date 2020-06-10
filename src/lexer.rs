@@ -1,3 +1,17 @@
+//! The Lexer struct tokenizes the input and returns a VecDeque of Tokens
+//! The lexer may prematurely return an error if it can not parse a specific character.
+//!
+//! The lexer must be the first thing that is invoked because it generates the tokens necessary for the VM.
+//!
+//! # Example
+//! ```
+//! # fn run() -> Result<(), Error> {
+//! let contents = "push 1";
+//! let tokens = Lexer::new().lex(contents)?;
+//! # Ok(())
+//! # }
+//! ```
+
 use crate::{
     utils::error::{Error, ErrorKind},
     utils::token::{Token, TokenKind},
@@ -10,28 +24,34 @@ pub struct Lexer {
 }
 
 impl Lexer {
+    /// Constructs a new lexer with the current position set to 0 (the first token).
     pub fn new() -> Lexer {
         Lexer {
             current_position: 0,
         }
     }
 
+    /// This function lexes the input and returns either a VecDeque of tokens or an error.
+    /// The return value of this function may change to returning a vector of errors.
+    ///
+    /// # Arguments
+    /// * `contents` - The contents to lex. This may come from a file or from the REPL.
     pub fn lex(&mut self, contents: &str) -> Result<VecDeque<Token>, Error> {
         let mut iter = contents.chars().peekable();
         let mut tokens = VecDeque::new();
         while let Some(ch) = iter.next() {
             self.current_position += 1;
 
+            // If the current character is a whitespace or a comment, handle it, and continue lexing.
             if ch.is_ascii_whitespace() || self.handle_comments(ch, &mut iter) {
                 continue;
             }
 
+            // Identify what the character is and try to lex as much of it as possible.
             match ch {
                 '0'..='9' | '-' => tokens.push_back(self.make_number(ch, &mut iter)?),
                 '\'' | '"' => tokens.push_back(self.make_string(ch, &mut iter)?),
-                letter if ch.is_ascii_alphabetic() => {
-                    tokens.push_back(self.make_word(letter, &mut iter))
-                }
+                letter if ch.is_ascii_alphabetic() => tokens.push_back(self.make_word(letter, &mut iter)),
                 _ => {
                     return Err(Error::new(
                         ErrorKind::UnknownCharacter,
@@ -44,11 +64,18 @@ impl Lexer {
         Ok(tokens)
     }
 
+    /// This function produces an int, a float, or an error.
+    ///
+    /// # Arguments
+    /// * `digit` - The first character of the number. This may also be a negative sign.
+    /// * `iter` - The iterator which contains all of the characters.
     fn make_number(&mut self, digit: char, iter: &mut Peekable<Chars>) -> Result<Token, Error> {
         let initial_point = self.current_position;
         let mut number = digit.to_string();
         let mut has_decimal_point = false;
         while let Some(ch) = iter.peek() {
+            // After the type of the character has been identified, it is important to remember to advance the iterator.
+            // Otherwise, an infinite loop will be generated.
             if ch.is_ascii_digit() {
                 number.push(self.advance(iter));
             } else if ch == &'.' && !has_decimal_point {
@@ -59,6 +86,7 @@ impl Lexer {
             }
         }
 
+        // If it does not have a decimal point, it must be an integer.
         if !has_decimal_point {
             if let Ok(value) = number.parse() {
                 Ok(Token::new(TokenKind::IntegerLiteral(value), initial_point))
@@ -80,6 +108,11 @@ impl Lexer {
         }
     }
 
+    /// This function produces an instruction, identifier, a special type. This funtion always succeeds because a word is always an identifier.
+    ///
+    /// # Arguments
+    /// * `letter` - The first letter of the word.
+    /// * `iter` - The iterator which contains all of the characters.
     fn make_word(&mut self, letter: char, iter: &mut Peekable<Chars>) -> Token {
         let initial_point = self.current_position;
         let mut word = letter.to_string();
@@ -92,6 +125,7 @@ impl Lexer {
             }
         }
 
+        // This probably could be written using a match statement.
         if word.eq_ignore_ascii_case(&"void") {
             Token::new(TokenKind::Void, initial_point)
         } else if word.eq_ignore_ascii_case(&"any") {
@@ -103,6 +137,11 @@ impl Lexer {
         }
     }
 
+    /// This function produces an string or an error.
+    ///
+    /// # Arguments
+    /// * `beginning_of_string` - The first opening quote used to begin the string. This could be ' or ".
+    /// * `iter` - The iterator which contains all of the characters.
     fn make_string(
         &mut self,
         beginning_of_string: char,
@@ -119,6 +158,7 @@ impl Lexer {
             }
         }
 
+        // If the string does not end with the same quote used to open it, the function returns an error.
         if !string.ends_with(beginning_of_string) {
             Err(Error::new(ErrorKind::UnterminatedString, initial_point))
         } else {
@@ -126,6 +166,11 @@ impl Lexer {
         }
     }
 
+    /// This function handles comments. This function returns whether or not it found a commment and handled it.
+    ///
+    /// # Arguments
+    /// * `ch` - The current character the lexer is looking at.
+    /// * `iter` - The iterator which contains all of the characters.
     fn handle_comments(&mut self, ch: char, iter: &mut Peekable<Chars>) -> bool {
         if ch == '-' {
             match iter.peek() {
@@ -144,6 +189,10 @@ impl Lexer {
         }
     }
 
+    /// This function handles single line comments.
+    ///
+    /// # Arguments
+    /// * `iter` - The iterator which contains all of the characters.
     fn handle_single_line_comments(&mut self, iter: &mut Peekable<Chars>) {
         self.advance(iter);
         while let Some(c) = iter.next() {
@@ -154,6 +203,10 @@ impl Lexer {
         }
     }
 
+    /// This function handles multiline comments.
+    ///
+    /// # Arguments
+    /// * `iter` - The iterator which contains all of the characters.
     fn handle_multi_line_comments(&mut self, iter: &mut Peekable<Chars>) {
         self.advance(iter);
         while let Some(c) = iter.next() {
@@ -167,6 +220,11 @@ impl Lexer {
         }
     }
 
+    /// This function increments the current position and returns the next character.
+    /// The bounds check was already performed by the loops, so there is no need to return an option.
+    ///
+    /// # Arguments
+    /// * `iter` - The iterator which contains all of the characters.
     fn advance(&mut self, iter: &mut Peekable<Chars>) -> char {
         self.current_position += 1;
         iter.next().unwrap()
