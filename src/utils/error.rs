@@ -58,6 +58,7 @@ pub enum ErrorKind {
     UnknownCharacter,
     InvalidNumberFormat,
     UnterminatedString,
+    EmptyStack,
     ExpectedArgs(usize),
     TypeMismatch(ValueKind, ValueKind),
 }
@@ -79,6 +80,7 @@ impl Into<String> for ErrorKind {
                     }
                 )
             }
+            ErrorKind::EmptyStack => "Tried To Pop From An Empty Stack.",
             ErrorKind::TypeMismatch(expected, actual) => {
                 return format!(
                     "Expected The Type {:#?}, But Found The Type {:#?}.",

@@ -24,6 +24,7 @@ Currently, DarkVM supports the following types:
 
 The instructions that DarkVM currently supports are:
   - push
+  - pop
 
 ***
 
@@ -43,3 +44,22 @@ After this operation, the stack will look like this:
 ```
 [1]
 ```
+
+**The Pop Instruction**
+
+The Pop Instruction takes zero parameters.
+
+Example:
+
+```
+pop
+```
+
+> The pop instruction removes the top value from the stack and returns this value.
+
+After this operation, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the int 1.

@@ -48,6 +48,7 @@ impl VM {
             ValueKind::Variable(_, val) => Ok(Some(val.clone())),
 
             ValueKind::Push => self.push(value.pos),
+            ValueKind::Pop => self.pop(value.pos),
         }
     }
 
@@ -64,6 +65,10 @@ impl VM {
         }
 
         Ok(None)
+    }
+
+    fn pop(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        self.stack.pop(pos).map(|val| Some(val))
     }
 
     fn get_arg(

@@ -17,7 +17,7 @@ fn main() {
             match vm.run() {
                 Ok(result) => {
                     if result.is_some() {
-                        println!("{:#?}\n", result);
+                        println!("Result From Final Operation: {:#?}\n", result.unwrap());
                     }
 
                     println!("{:#?}", vm);
