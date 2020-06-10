@@ -1,3 +1,5 @@
+//! The Error struct maintains the errors that occur during execution.
+
 use crate::values::values::ValueKind;
 
 pub struct Error {
@@ -6,13 +8,29 @@ pub struct Error {
 }
 
 impl Error {
+    /// Constructs a new error with the error kind and the position.
+    ///
+    /// # Arguments
+    /// `kind` - The type of the error. Maintaining the type allows for the messages to be controlled across execution.
+    /// `position` - The position where the error occurred.
     pub fn new(kind: ErrorKind, position: usize) -> Error {
         Error { kind, position }
     }
 
+    /// This function generates a pretty version of the error, with arrows pointing to the exact location of the error.
+    /// This function also consumes the error, therefore, it should be the last thing called.
+    ///
+    /// # Arguments
+    /// `input` - The input for the program. This is not maintained with every error because the input might be different.
     pub fn prettify(self, input: &str) -> String {
+        // Get the line and column number of where the error occurred.
         let (line_number, column_number) = self.get_line_column_info(input);
+        
+        // Check if a line is present. If not, the error is printed without the arrows.
+        // This should usually produce a line, but it may not.
         let option_line = input.split_terminator('\n').nth(line_number - 1);
+        
+        // Convert the kind into an error message.
         let error_message: String = self.kind.into();
         if let Some(line) = option_line {
             let len = line_number.to_string().len();
@@ -33,8 +51,11 @@ impl Error {
         }
     }
 
+    /// This function gets the line and column number of where the error occurred with respect to the input.
     fn get_line_column_info(&self, input: &str) -> (usize, usize) {
         let (mut line_number, mut column_number) = (1, 0);
+        
+        // Go through the characters and find the index that matches the position given in the error struct.
         input.chars().enumerate().find(|(idx, ch)| {
             if ch == &'\n' {
                 line_number += 1;
@@ -54,6 +75,10 @@ impl Error {
     }
 }
 
+/// The ErrorKind enum maintains the different errors that can occur during the execution of the program.
+/// This allows for uniformity across the various errors because the error messages are the same.
+/// This also increases readibility within the code, because the ErrorKind's are more descriptive.
+
 pub enum ErrorKind {
     UnknownCharacter,
     InvalidNumberFormat,
@@ -63,6 +88,8 @@ pub enum ErrorKind {
     TypeMismatch(ValueKind, ValueKind),
 }
 
+/// Converts the ErrorKind into a String.
+/// This is used in the prettify method to produce the error messages needed.
 impl Into<String> for ErrorKind {
     fn into(self) -> String {
         match self {

@@ -1,5 +1,5 @@
 **DarkVM**
--
+
 A new VM that focuses on providing current features without comprimising
 on speed and simplicity.
 
@@ -10,6 +10,7 @@ on speed and simplicity.
 DarkVM operates on a stack and uses different operations to operate on it.
 
 **Types In DarkVM**
+
 Currently, DarkVM supports the following types:
 - void
 - any
@@ -63,3 +64,21 @@ After this operation, the stack will look like this:
 ```
 
 The value returned will be the int 1.
+
+**Comments In DarkVM**
+
+DarkVM supports both single line and multiline comments.
+
+Single line comments can be created using the following syntax:
+```sql
+
+-- This is a comment.
+```
+
+Multiline comments can be created using the following syntax:
+```
+-!
+  This is a multiline comment.
+  I can write anything I want here.
+!-
+```
