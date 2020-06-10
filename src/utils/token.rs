@@ -19,12 +19,14 @@ pub enum TokenKind {
     StringLiteral(String),
     Identifier(String),
     Push,
+    Pop,
 }
 
 impl TokenKind {
     pub fn is_instruction(name: &String) -> Option<TokenKind> {
         match name.to_ascii_lowercase().as_str() {
             "push" => Some(TokenKind::Push),
+            "pop"  => Some(TokenKind::Pop),
             _ => None,
         }
     }

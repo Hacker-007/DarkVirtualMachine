@@ -1,2 +1,2 @@
-push "hello"
-push hello
+push "hello, world!"
+pop

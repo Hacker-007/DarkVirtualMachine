@@ -20,6 +20,7 @@ pub enum ValueKind {
     String(String),
     Variable(String, Rc<Value>),
     Push,
+    Pop,
 }
 
 impl From<Token> for Value {
@@ -36,6 +37,7 @@ impl From<Token> for Value {
                     ValueKind::Variable(name, Rc::new(Value::new(token.pos, ValueKind::Void)))
                 }
                 TokenKind::Push => ValueKind::Push,
+                TokenKind::Pop => ValueKind::Pop,
             },
         }
     }
@@ -57,6 +59,7 @@ impl fmt::Debug for ValueKind {
             ValueKind::String(value) => write!(f, "{}", value),
             ValueKind::Variable(name, value) => write!(f, "{} => {:#?}", name, value),
             ValueKind::Push => write!(f, "<instruction push>"),
+            ValueKind::Pop => write!(f, "<instruction pop>"),
         }
     }
 }
