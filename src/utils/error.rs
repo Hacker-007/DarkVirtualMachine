@@ -86,6 +86,8 @@ pub enum ErrorKind {
     EmptyStack,
     ExpectedArgs(usize),
     TypeMismatch(ValueKind, ValueKind),
+    UnsupportedOperation(String, String),
+    DivisionByZero,
 }
 
 /// Converts the ErrorKind into a String.
@@ -113,7 +115,9 @@ impl Into<String> for ErrorKind {
                     "Expected The Type {:#?}, But Found The Type {:#?}.",
                     expected, actual
                 )
-            }
+            },
+            ErrorKind::UnsupportedOperation(operation, operand) => return format!("The Operation '{}' Can Not Be Applied To {}", operation, operand),
+            ErrorKind::DivisionByZero => "Tried To Divide By 0.",
         }
         .to_owned()
     }

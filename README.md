@@ -26,12 +26,16 @@ Currently, DarkVM supports the following types:
 The instructions that DarkVM currently supports are:
   - push
   - pop
+  - add
+  - sub
+  - mul
+  - div
 
 ***
 
 **The Push Instruction**
 
-The Push Instruction takes one parameter: the value to be pushed on to the stack.
+The Push instruction takes one parameter: the value to be pushed on to the stack.
 
 Example:
 
@@ -41,14 +45,20 @@ push 1
 
 > The push instruction takes an int, 1, and pushes this value on the stack.
 
-After this operation, the stack will look like this:
+Example:
+
+```
+push 1
+```
+
+After this instruction, the stack will look like this:
 ```
 [1]
 ```
 
 **The Pop Instruction**
 
-The Pop Instruction takes zero parameters.
+The Pop instruction takes zero parameters.
 
 Example:
 
@@ -58,12 +68,122 @@ pop
 
 > The pop instruction removes the top value from the stack and returns this value.
 
-After this operation, the stack will look like this:
+Example:
+```
+push 1
+pop
+```
+
+After this instruction, the stack will look like this:
 ```
 []
 ```
 
 The value returned will be the int 1.
+
+**The Add Instruction**
+
+The Add instruction takes zero parameters.
+
+Example:
+```
+add
+```
+
+> The add instruction removes the top two values from the stack and adds them together. It then returns this value.
+
+Example:
+
+```
+push 1
+push 2
+add
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the int 3.
+
+**The Sub Instruction**
+
+The Sub instruction takes zero parameters.
+
+Example:
+```
+sub
+```
+
+> The sub instruction removes the top two values from the stack and subtracts them. It then returns this value.
+
+Example:
+
+```
+push 1
+push 2
+sub
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the int 1.
+
+**The Mul Instruction**
+
+The Mul instruction takes zero parameters.
+
+Example:
+```
+mul
+```
+
+> The mul instruction removes the top two values from the stack and multiplies them. It then returns this value.
+
+Example:
+
+```
+push 1
+push 2
+mul
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the int 2.
+
+**The Div Instruction**
+
+The Div instruction takes zero parameters.
+
+Example:
+```
+div
+```
+
+> The div instruction removes the top two values from the stack and divides them. It then returns this value.
+
+Example:
+
+```
+push 1
+push 2
+div
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the int 0 because 1 / 2 = 0 with integer division. If float division was used, the result would be 0.5.
 
 **Comments In DarkVM**
 

@@ -29,17 +29,4 @@ impl<T: Debug + PartialEq> Stack<T> {
     pub fn pop(&mut self, pos: usize) -> Result<T, Error> {
         self.0.pop().ok_or(Error::new(ErrorKind::EmptyStack, pos))
     }
-    
-    /// This function checks if the given value exists within the stack.
-    ///
-    /// # Arguments
-    /// `value` - The value to check.
-    pub fn contains(&self, value: T) -> bool {
-        self.0.iter().any(|val| val == &value)
-    }
-
-    /// This function returns the number of elements in the stack.
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
 }

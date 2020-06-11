@@ -148,10 +148,12 @@ impl Lexer {
         iter: &mut Peekable<Chars>,
     ) -> Result<Token, Error> {
         let initial_point = self.current_position;
-        let mut string = beginning_of_string.to_string();
+        let mut string = String::new();
+        let mut is_terminated = false;
         while let Some(ch) = iter.peek() {
             if ch == &beginning_of_string {
-                string.push(self.advance(iter));
+                self.advance(iter);
+                is_terminated = true;
                 break;
             } else {
                 string.push(self.advance(iter));
@@ -159,7 +161,7 @@ impl Lexer {
         }
 
         // If the string does not end with the same quote used to open it, the function returns an error.
-        if !string.ends_with(beginning_of_string) {
+        if !is_terminated {
             Err(Error::new(ErrorKind::UnterminatedString, initial_point))
         } else {
             Ok(Token::new(TokenKind::StringLiteral(string), initial_point))

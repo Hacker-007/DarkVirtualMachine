@@ -78,7 +78,11 @@ impl VM {
             ValueKind::Variable(_, val) => Ok(Some(val.clone())),
 
             ValueKind::Push => self.push(value.pos),
-            ValueKind::Pop => self.pop(value.pos),
+            ValueKind::Pop => self.pop(value.pos).map(|(_, value)| value),
+            ValueKind::Add => self.add(value.pos),
+            ValueKind::Sub => self.sub(value.pos),
+            ValueKind::Mul => self.mul(value.pos),
+            ValueKind::Div => self.div(value.pos),
         }
     }
 
@@ -108,12 +112,76 @@ impl VM {
 
     /// Pops the top value from the stack.
     ///
-    /// # Arguements
+    /// # Arguments
     /// * `pos` - The position where the instruction was called.
-    fn pop(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+    fn pop(&mut self, pos: usize) -> Result<(usize, Option<Rc<Value>>), Error> {
         // Pop the value and if there are no errors, map it to an option with the value.
         // stack.pop takes the position where the instruction was used in the case that the stack was empty.
-        self.stack.pop(pos).map(|val| Some(val))
+        self.stack.pop(pos).map(|val| (val.pos, Some(val)))
+    }
+
+    /// Pops the top two values from the stack and adds them together.
+    /// This internally calls both the pop instruction and the add method on the Value struct.
+    ///
+    /// # Arguments
+    /// * `pos` - The position where the instruction was called.
+    fn add(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.pop(pos)?;
+        let (arg_pos_2, arg2) = self.pop(pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1.add(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
+        }
+    }
+
+    /// Pops the top two values from the stack and subtracts them.
+    /// This internally calls both the pop instruction and the sub method on the Value struct.
+    ///
+    /// # Arguments
+    /// * `pos` - The position where the instruction was called.
+    fn sub(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.pop(pos)?;
+        let (arg_pos_2, arg2) = self.pop(pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1.sub(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
+        }
+    }
+
+    /// Pops the top two values from the stack and multiplies them.
+    /// This internally calls both the pop instruction and the mul method on the Value struct.
+    ///
+    /// # Arguments
+    /// * `pos` - The position where the instruction was called.
+    fn mul(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.pop(pos)?;
+        let (arg_pos_2, arg2) = self.pop(pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1.mul(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
+        }
+    }
+
+    /// Pops the top two values from the stack and divides them.
+    /// This internally calls both the pop instruction and the div method on the Value struct.
+    ///
+    /// # Arguments
+    /// * `pos` - The position where the instruction was called.
+    fn div(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.pop(pos)?;
+        let (arg_pos_2, arg2) = self.pop(pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1.div(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
+        }
     }
 
     /// Gets the next argument.

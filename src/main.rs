@@ -40,7 +40,7 @@ fn main() {
     // Run the program by derefencing the String into a &str.
     match run(&contents) {
         Err(error) => println!("{}", error),
-        Ok(_) => {},
+        Ok(vm) => println!("{:#?}", vm),
     }
 }
 
@@ -67,8 +67,8 @@ fn test_push_instrution() {
     assert!(result.is_ok());
     
     let vm = result.unwrap();
-    assert_eq!(vm.stack.len(), 1);
-    assert!(vm.stack.contains(value!(ValueKind::Int(1))))
+    assert_eq!(vm.stack.0.len(), 1);
+    assert!(vm.stack.0.iter().any(|value| value == &value!(ValueKind::Int(1))))
 }
 
 #[test]
@@ -81,6 +81,6 @@ fn test_pop_instrution() {
     assert!(result.is_ok());
     
     let vm = result.unwrap();
-    assert_eq!(vm.stack.len(), 0);
-    assert!(!vm.stack.contains(value!(ValueKind::Int(1))))
+    assert_eq!(vm.stack.0.len(), 0);
+    assert!(!vm.stack.0.iter().any(|value| value == &value!(ValueKind::Int(1))))
 }

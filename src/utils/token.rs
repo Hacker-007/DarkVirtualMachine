@@ -32,6 +32,10 @@ pub enum TokenKind {
     Identifier(String),
     Push,
     Pop,
+    Add,
+    Sub,
+    Mul,
+    Div,
 }
 
 impl TokenKind {
@@ -44,6 +48,11 @@ impl TokenKind {
         match name.to_ascii_lowercase().as_str() {
             "push" => Some(TokenKind::Push),
             "pop"  => Some(TokenKind::Pop),
+            "add"  => Some(TokenKind::Add),
+            "sub"  => Some(TokenKind::Sub),
+            "mul"  => Some(TokenKind::Mul),
+            "div"  => Some(TokenKind::Div),
+            
             _ => None,
         }
     }
