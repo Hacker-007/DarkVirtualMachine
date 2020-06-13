@@ -28,6 +28,7 @@ pub enum TokenKind {
     Any,
     IntegerLiteral(i64),
     FloatLiteral(f64),
+    BooleanLiteral(bool),
     StringLiteral(String),
     Identifier(String),
     Push,
@@ -36,6 +37,12 @@ pub enum TokenKind {
     Sub,
     Mul,
     Div,
+    LessThan,
+    LessThanEqual,
+    GreaterThan,
+    GreaterThanEqual,
+    Equal,
+    NotEqual,
 }
 
 impl TokenKind {
@@ -52,6 +59,12 @@ impl TokenKind {
             "sub"  => Some(TokenKind::Sub),
             "mul"  => Some(TokenKind::Mul),
             "div"  => Some(TokenKind::Div),
+            "lt"   => Some(TokenKind::LessThan),
+            "lte"  => Some(TokenKind::LessThanEqual),
+            "gt"   => Some(TokenKind::GreaterThan),
+            "gte"  => Some(TokenKind::GreaterThanEqual),
+            "eq"   => Some(TokenKind::Equal),
+            "neq"  => Some(TokenKind::NotEqual),
             
             _ => None,
         }
