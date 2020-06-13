@@ -72,7 +72,7 @@ impl VM {
             ValueKind::Void => Ok(None),
             ValueKind::Any => Ok(None),
 
-            ValueKind::Int(_) | ValueKind::Float(_) | ValueKind::String(_) => Ok(Some(value)),
+            ValueKind::Int(_) | ValueKind::Float(_) | ValueKind::Boolean(_) | ValueKind::String(_) => Ok(Some(value)),
 
             // Cloning here is cheap because val is reference counted, so only a counter is incremented.
             ValueKind::Variable(_, val) => Ok(Some(val.clone())),
@@ -83,6 +83,12 @@ impl VM {
             ValueKind::Sub => self.sub(value.pos),
             ValueKind::Mul => self.mul(value.pos),
             ValueKind::Div => self.div(value.pos),
+            ValueKind::LessThan => self.lt(value.pos),
+            ValueKind::LessThanEqual => self.lte(value.pos),
+            ValueKind::GreaterThan => self.gt(value.pos),
+            ValueKind::GreaterThanEqual => self.gte(value.pos),
+            ValueKind::Equal => self.eq(value.pos),
+            ValueKind::NotEqual => self.neq(value.pos),
         }
     }
 
@@ -179,6 +185,96 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.div(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
+        }
+    }
+
+    /// Compares the two arguments and returns if the first argument is less than the second argument.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn lt(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.get_arg(2, pos)?;
+        let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1.lt(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
+        }
+    }
+
+    /// Compares the two arguments and returns if the first argument is less than the second argument.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn lte(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.get_arg(2, pos)?;
+        let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1.lte(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
+        }
+    }
+
+    /// Compares the two arguments and returns if the first argument is less than the second argument.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn gt(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.get_arg(2, pos)?;
+        let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1.gt(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
+        }
+    }
+
+    /// Compares the two arguments and returns if the first argument is less than the second argument.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn gte(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.get_arg(2, pos)?;
+        let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1.gte(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
+        }
+    }
+
+    /// Compares the two arguments and returns if the first argument is less than the second argument.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn eq(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.get_arg(2, pos)?;
+        let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1.equal(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
+        }
+    }
+
+    /// Compares the two arguments and returns if the first argument is less than the second argument.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn neq(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.get_arg(2, pos)?;
+        let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1.not_equal(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
             (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_1)),
             (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any, ValueKind::Void), arg_pos_2))
         }

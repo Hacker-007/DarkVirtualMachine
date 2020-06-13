@@ -23,6 +23,10 @@ impl Value {
 impl Value {
     /// This function takes the current value and a reference to another value and adds them together.
     /// Note that this function does not take ownership of either value. Instead, it creates a new value.
+    ///
+    /// # Arguments
+    /// `other` - The other value to add.
+    /// `pos` - The position where this operation was called.
     pub fn add(&self, other: &Value, pos: usize) -> Result<Value, Error> {
         match (&self.kind, &other.kind) {
             (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1.add(val2, pos),
@@ -44,6 +48,10 @@ impl Value {
 
     /// This function takes the current value and a reference to another value and subtracts them.
     /// Note that this function does not take ownership of either value. Instead, it creates a new value.
+    ///
+    /// # Arguments
+    /// `other` - The other value to subtract.
+    /// `pos` - The position where this operation was called.
     pub fn sub(&self, other: &Value, pos: usize) -> Result<Value, Error> {
         match (&self.kind, &other.kind) {
             (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1.add(val2, pos),
@@ -61,6 +69,10 @@ impl Value {
 
     /// This function takes the current value and a reference to another value and mutliplies them.
     /// Note that this function does not take ownership of either value. Instead, it creates a new value.
+    ///
+    /// # Arguments
+    /// `other` - The other value to multiply.
+    /// `pos` - The position where this operation was called.
     pub fn mul(&self, other: &Value, pos: usize) -> Result<Value, Error> {
         match (&self.kind, &other.kind) {
             (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1.add(val2, pos),
@@ -81,6 +93,10 @@ impl Value {
 
     /// This function takes the current value and a reference to another value and divides them.
     /// Note that this function does not take ownership of either value. Instead, it creates a new value.
+    ///
+    /// # Arguments
+    /// `other` - The other value to divide.
+    /// `pos` - The position where this operation was called.
     pub fn div(&self, other: &Value, pos: usize) -> Result<Value, Error> {
         match (&self.kind, &other.kind) {
             (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1.add(val2, pos),
@@ -119,6 +135,128 @@ impl Value {
             _ => Err(Error::new(ErrorKind::UnsupportedOperation("Div".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
         }
     }
+
+    /// This function takes the current value and a reference to another value and returns if the current value
+    /// is less than the second one. Note that this function does not consume either value.
+    ///
+    /// # Arguments
+    /// `other` - The other value to compare.
+    /// `pos` - The position where this operation was called.
+    pub fn lt(&self, other: &Value, pos: usize) -> Result<Value, Error> {
+        match (&self.kind, &other.kind) {
+            (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1.lt(val2, pos),
+            (ValueKind::Variable(_, val1), _) => val1.lt(other, pos),
+            (_, ValueKind::Variable(_, val2)) => self.lt(val2, pos),
+            
+            (ValueKind::Int(val1), ValueKind::Int(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 < val2))),
+            (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 < val2))),
+            (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 < val2))),
+
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Lt".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+        }
+    }
+
+    /// This function takes the current value and a reference to another value and returns if the current value
+    /// is less than or equal to the second one. Note that this function does not consume either value.
+    ///
+    /// # Arguments
+    /// `other` - The other value to compare.
+    /// `pos` - The position where this operation was called.
+    pub fn lte(&self, other: &Value, pos: usize) -> Result<Value, Error> {
+        match (&self.kind, &other.kind) {
+            (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1.lte(val2, pos),
+            (ValueKind::Variable(_, val1), _) => val1.lte(other, pos),
+            (_, ValueKind::Variable(_, val2)) => self.lte(val2, pos),
+            
+            (ValueKind::Int(val1), ValueKind::Int(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 <= val2))),
+            (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 <= val2))),
+            (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 <= val2))),
+
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Lte".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+        }
+    }
+
+    /// This function takes the current value and a reference to another value and returns if the current value
+    /// is greater than the second one. Note that this function does not consume either value.
+    ///
+    /// # Arguments
+    /// `other` - The other value to compare.
+    /// `pos` - The position where this operation was called.
+    pub fn gt(&self, other: &Value, pos: usize) -> Result<Value, Error> {
+        match (&self.kind, &other.kind) {
+            (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1.gt(val2, pos),
+            (ValueKind::Variable(_, val1), _) => val1.gt(other, pos),
+            (_, ValueKind::Variable(_, val2)) => self.gt(val2, pos),
+            
+            (ValueKind::Int(val1), ValueKind::Int(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 > val2))),
+            (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 > val2))),
+            (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 > val2))),
+
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Gt".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+        }
+    }
+
+    /// This function takes the current value and a reference to another value and returns if the current value
+    /// is greater than or equal to the second one. Note that this function does not consume either value.
+    ///
+    /// # Arguments
+    /// `other` - The other value to compare.
+    /// `pos` - The position where this operation was called.
+    pub fn gte(&self, other: &Value, pos: usize) -> Result<Value, Error> {
+        match (&self.kind, &other.kind) {
+            (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1.gte(val2, pos),
+            (ValueKind::Variable(_, val1), _) => val1.gte(other, pos),
+            (_, ValueKind::Variable(_, val2)) => self.gte(val2, pos),
+            
+            (ValueKind::Int(val1), ValueKind::Int(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 >= val2))),
+            (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 >= val2))),
+            (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 >= val2))),
+
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Gte".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+        }
+    }
+
+    /// This function takes the current value and a reference to another value and returns if the current value
+    /// is equal to the second one. Note that this function does not consume either value.
+    ///
+    /// # Arguments
+    /// `other` - The other value to compare.
+    /// `pos` - The position where this operation was called.
+    pub fn equal(&self, other: &Value, pos: usize) -> Result<Value, Error> {
+        match (&self.kind, &other.kind) {
+            (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1.equal(val2, pos),
+            (ValueKind::Variable(_, val1), _) => val1.equal(other, pos),
+            (_, ValueKind::Variable(_, val2)) => self.equal(val2, pos),
+            
+            (ValueKind::Int(val1), ValueKind::Int(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 == val2))),
+            (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 == val2))),
+            (ValueKind::Boolean(val1), ValueKind::Boolean(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 == val2))),
+            (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 == val2))),
+
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Eq".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+        }
+    }
+
+    /// This function takes the current value and a reference to another value and returns if the current value
+    /// is not equal to the second one. Note that this function does not consume either value. 
+    ///
+    /// # Arguments
+    /// `other` - The other value to compare.
+    /// `pos` - The position where this operation was called.
+    pub fn not_equal(&self, other: &Value, pos: usize) -> Result<Value, Error> {
+        match (&self.kind, &other.kind) {
+            (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1.not_equal(val2, pos),
+            (ValueKind::Variable(_, val1), _) => val1.not_equal(other, pos),
+            (_, ValueKind::Variable(_, val2)) => self.not_equal(val2, pos),
+            
+            (ValueKind::Int(val1), ValueKind::Int(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 != val2))),
+            (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 != val2))),
+            (ValueKind::Boolean(val1), ValueKind::Boolean(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 != val2))),
+            (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 != val2))),
+
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Neq".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+        }
+    }
 }
 
 /// The ValueKind enum maintains the various types in the language.
@@ -129,6 +267,7 @@ pub enum ValueKind {
     Any,
     Int(i64),
     Float(f64),
+    Boolean(bool),
     String(String),
     Variable(String, Rc<Value>),
     Push,
@@ -137,6 +276,12 @@ pub enum ValueKind {
     Sub,
     Mul,
     Div,
+    LessThan,
+    LessThanEqual,
+    GreaterThan,
+    GreaterThanEqual,
+    Equal,
+    NotEqual,
 }
 
 impl ValueKind {
@@ -149,6 +294,7 @@ impl ValueKind {
             ValueKind::Any => "Any",
             ValueKind::Int(_) => "Int",
             ValueKind::Float(_) => "Float",
+            ValueKind::Boolean(_) => "Boolean",
             ValueKind::String(_) => "String",
             ValueKind::Variable(_, value) => return value.kind.get_type_name(),
             ValueKind::Push => "Instruction Push",
@@ -157,6 +303,12 @@ impl ValueKind {
             ValueKind::Sub => "Instruction Sub",
             ValueKind::Mul => "Instruction Mul",
             ValueKind::Div => "Instruction Div",
+            ValueKind::LessThan => "Instruction LessThan",
+            ValueKind::LessThanEqual => "Instruction LessThanEqual",
+            ValueKind::GreaterThan => "Instruction GreaterThan",
+            ValueKind::GreaterThanEqual => "Instruction GreaterThanEqual",
+            ValueKind::Equal => "Instruction Equal",
+            ValueKind::NotEqual => "Instruction NotEqual",
         }.to_owned()
     }
 }
@@ -171,6 +323,7 @@ impl From<Token> for Value {
                 TokenKind::Any => ValueKind::Any,
                 TokenKind::IntegerLiteral(value) => ValueKind::Int(value),
                 TokenKind::FloatLiteral(value) => ValueKind::Float(value),
+                TokenKind::BooleanLiteral(value) => ValueKind::Boolean(value),
                 TokenKind::StringLiteral(value) => ValueKind::String(value),
                 TokenKind::Identifier(name) => ValueKind::Variable(name, Rc::new(Value::new(token.pos, ValueKind::Void))),
                 TokenKind::Push => ValueKind::Push,
@@ -179,6 +332,12 @@ impl From<Token> for Value {
                 TokenKind::Sub => ValueKind::Sub,
                 TokenKind::Mul => ValueKind::Mul,
                 TokenKind::Div => ValueKind::Div,
+                TokenKind::LessThan => ValueKind::LessThan,
+                TokenKind::LessThanEqual => ValueKind::LessThanEqual,
+                TokenKind::GreaterThan => ValueKind::GreaterThan,
+                TokenKind::GreaterThanEqual => ValueKind::GreaterThanEqual,
+                TokenKind::Equal => ValueKind::Equal,
+                TokenKind::NotEqual => ValueKind::NotEqual,
             },
         }
     }
@@ -197,6 +356,7 @@ impl PartialEq for ValueKind {
             (ValueKind::Any, ValueKind::Any) => true,
             (ValueKind::Int(val1), ValueKind::Int(val2)) => val1 == val2,
             (ValueKind::Float(val1), ValueKind::Float(val2)) => val1 == val2,
+            (ValueKind::Boolean(val1), ValueKind::Boolean(val2)) => val1 == val2,
             (ValueKind::String(val1), ValueKind::String(val2)) => val1 == val2,
             (ValueKind::Variable(_, val1), ValueKind::Variable(_, val2)) => val1 == val2,
             (ValueKind::Push, ValueKind::Push) |
@@ -204,7 +364,13 @@ impl PartialEq for ValueKind {
             (ValueKind::Add, ValueKind::Add) |
             (ValueKind::Sub, ValueKind::Sub) |
             (ValueKind::Mul, ValueKind::Mul) |
-            (ValueKind::Div, ValueKind::Div) => true,
+            (ValueKind::Div, ValueKind::Div) |
+            (ValueKind::LessThan, ValueKind::LessThan) |
+            (ValueKind::LessThanEqual, ValueKind::LessThanEqual) |
+            (ValueKind::GreaterThan, ValueKind::GreaterThan) |
+            (ValueKind::GreaterThanEqual, ValueKind::GreaterThanEqual) |
+            (ValueKind::Equal, ValueKind::Equal) |
+            (ValueKind::NotEqual, ValueKind::NotEqual) => true,
             _ => false,
         }
     }
@@ -223,6 +389,7 @@ impl fmt::Debug for ValueKind {
             ValueKind::Any => write!(f, "Any"),
             ValueKind::Int(value) => write!(f, "{}", value),
             ValueKind::Float(value) => write!(f, "{}", value),
+            ValueKind::Boolean(value) => write!(f, "{}", value),
             ValueKind::String(value) => write!(f, "{}", value),
             ValueKind::Variable(name, _) => write!(f, "Variable '{}'", name),
             ValueKind::Push => write!(f, "<instruction push>"),
@@ -231,6 +398,12 @@ impl fmt::Debug for ValueKind {
             ValueKind::Sub => write!(f, "<instruction sub>"),
             ValueKind::Mul => write!(f, "<instruction mul>"),
             ValueKind::Div => write!(f, "<instruction div>"),
+            ValueKind::LessThan => write!(f, "<instruction lt>"),
+            ValueKind::LessThanEqual => write!(f, "<instruction lte>"),
+            ValueKind::GreaterThan => write!(f, "<instruction gt>"),
+            ValueKind::GreaterThanEqual => write!(f, "<instruction gte>"),
+            ValueKind::Equal => write!(f, "<instruction eq>"),
+            ValueKind::NotEqual => write!(f, "<instruction neq>"),
         }
     }
 }

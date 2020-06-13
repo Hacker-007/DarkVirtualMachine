@@ -30,6 +30,12 @@ The instructions that DarkVM currently supports are:
   - sub
   - mul
   - div
+  - lt
+  - lte
+  - gt
+  - gte
+  - eq
+  - neq
 
 ***
 
@@ -171,7 +177,6 @@ div
 > The div instruction removes the top two values from the stack and divides them. It then returns this value.
 
 Example:
-
 ```
 push 1
 push 2
@@ -184,6 +189,144 @@ After this instruction, the stack will look like this:
 ```
 
 The value returned will be the int 0 because 1 / 2 = 0 with integer division. If float division was used, the result would be 0.5.
+
+**The Lt Instruction**
+
+The Lt instruction takes two parameters
+
+Example:
+```
+lt 1 5
+```
+
+> The lt instruction checks if the first parameter is less than the second parameter. It then returns a boolean value representing the result of the comparison.
+
+Example:
+```
+lt 1 5
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the boolean true because 1 < 5.
+
+**The Lte Instruction**
+
+The Lte instruction takes two parameters
+
+Example:
+```
+lte 1 5
+```
+
+> The lte instruction checks if the first parameter is less than or equal to the second parameter. It then returns a boolean value representing the result of the comparison.
+
+Example:
+```
+lte 5 5
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the boolean true because 5 <= 5.
+
+**The Gt Instruction**
+
+The Gt instruction takes two parameters
+
+Example:
+```
+gt 1 5
+```
+
+> The gt instruction checks if the first parameter is greater than the second parameter. It then returns a boolean value representing the result of the comparison.
+
+Example:
+```
+gt 1 5
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the boolean false because 1 < 5.
+
+**The Gte Instruction**
+
+The Gte instruction takes two parameters
+
+Example:
+```
+gte 1 5
+```
+
+> The gte instruction checks if the first parameter is greater than or equal to the second parameter. It then returns a boolean value representing the result of the comparison.
+
+Example:
+```
+gte 5 5
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the boolean true because 5 >= 5.
+
+**The Eq Instruction**
+
+The Eq instruction takes two parameters
+
+Example:
+```
+eq 1 5
+```
+
+> The eq instruction checks if the first parameter is equal to the second parameter. It then returns a boolean value representing the result of the comparison.
+
+Example:
+```
+eq 1 5
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the boolean false because 1 != 5.
+
+**The Neq Instruction**
+
+The Neq instruction takes two parameters
+
+Example:
+```
+neq 1 5
+```
+
+> The neq instruction checks if the first parameter is not equal to the second parameter. It then returns a boolean value representing the result of the comparison.
+
+Example:
+```
+neq 5 5
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the boolean false because 5 == 5.
 
 **Comments In DarkVM**
 

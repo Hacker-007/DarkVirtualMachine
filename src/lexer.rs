@@ -108,7 +108,7 @@ impl Lexer {
         }
     }
 
-    /// This function produces an instruction, identifier, a special type. This funtion always succeeds because a word is always an identifier.
+    /// This function produces an instruction, identifier, a special type, or a boolean. This funtion always succeeds because a word is always an identifier.
     ///
     /// # Arguments
     /// * `letter` - The first letter of the word.
@@ -130,6 +130,10 @@ impl Lexer {
             Token::new(TokenKind::Void, initial_point)
         } else if word.eq_ignore_ascii_case(&"any") {
             Token::new(TokenKind::Any, initial_point)
+        } else if word.eq_ignore_ascii_case(&"true") {
+            Token::new(TokenKind::BooleanLiteral(true), initial_point)
+        } else if word.eq_ignore_ascii_case(&"false") {
+            Token::new(TokenKind::BooleanLiteral(false), initial_point)
         } else if let Some(instruction) = TokenKind::is_instruction(&word) {
             Token::new(instruction, initial_point)
         } else {
