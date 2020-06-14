@@ -48,6 +48,8 @@ pub enum TokenKind {
     RelativeJump,
     JumpIfTrue,
     JumpIfFalse,
+    Print,
+    PrintNewLine,
 }
 
 impl TokenKind {
@@ -58,22 +60,24 @@ impl TokenKind {
     /// `name` - The name of the current word.
     pub fn is_instruction(name: &String) -> Option<TokenKind> {
         match name.to_ascii_lowercase().as_str() {
-            "push" => Some(TokenKind::Push),
-            "pop"  => Some(TokenKind::Pop),
-            "add"  => Some(TokenKind::Add),
-            "sub"  => Some(TokenKind::Sub),
-            "mul"  => Some(TokenKind::Mul),
-            "div"  => Some(TokenKind::Div),
-            "lt"   => Some(TokenKind::LessThan),
-            "lte"  => Some(TokenKind::LessThanEqual),
-            "gt"   => Some(TokenKind::GreaterThan),
-            "gte"  => Some(TokenKind::GreaterThanEqual),
-            "eq"   => Some(TokenKind::Equal),
-            "neq"  => Some(TokenKind::NotEqual),
-            "jmp"  => Some(TokenKind::Jump),
-            "rjmp" => Some(TokenKind::RelativeJump),
-            "jmpt" => Some(TokenKind::JumpIfTrue),
-            "jmpf" => Some(TokenKind::JumpIfFalse),
+            "push"   => Some(TokenKind::Push),
+            "pop"    => Some(TokenKind::Pop),
+            "add"    => Some(TokenKind::Add),
+            "sub"    => Some(TokenKind::Sub),
+            "mul"    => Some(TokenKind::Mul),
+            "div"    => Some(TokenKind::Div),
+            "lt"     => Some(TokenKind::LessThan),
+            "lte"    => Some(TokenKind::LessThanEqual),
+            "gt"     => Some(TokenKind::GreaterThan),
+            "gte"    => Some(TokenKind::GreaterThanEqual),
+            "eq"     => Some(TokenKind::Equal),
+            "neq"    => Some(TokenKind::NotEqual),
+            "jmp"    => Some(TokenKind::Jump),
+            "rjmp"   => Some(TokenKind::RelativeJump),
+            "jmpt"   => Some(TokenKind::JumpIfTrue),
+            "jmpf"   => Some(TokenKind::JumpIfFalse),
+            "print"  => Some(TokenKind::Print),
+            "printn" => Some(TokenKind::PrintNewLine),
             
             _ => None,
         }

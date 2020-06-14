@@ -265,6 +265,8 @@ impl From<Token> for Value {
                 TokenKind::RelativeJump => ValueKind::RelativeJump,
                 TokenKind::JumpIfTrue => ValueKind::JumpIfTrue,
                 TokenKind::JumpIfFalse => ValueKind::JumpIfFalse,
+                TokenKind::Print => ValueKind::Print,
+                TokenKind::PrintNewLine => ValueKind::PrintNewLine,
             },
         }
     }

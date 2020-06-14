@@ -93,6 +93,8 @@ impl VM {
             ValueKind::RelativeJump => self.rjmp(value.pos),
             ValueKind::JumpIfTrue => self.jmpt(value.pos),
             ValueKind::JumpIfFalse => self.jmpf(value.pos),
+            ValueKind::Print => self.print(value.pos),
+            ValueKind::PrintNewLine => self.printn(value.pos),
         }
     }
 
@@ -365,6 +367,36 @@ impl VM {
             Some(value) if !value.is_truthy() => self.jmp(pos),
             None => Err(Error::new(ErrorKind::EmptyStack, pos)),
             _ => Ok(None)
+        }
+    }
+
+    /// Prints the argument passed in.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn print(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.get_arg(1, pos)?;
+        match arg1 {
+            Some(value) => {
+                print!("{:#?}", value);
+                Ok(None)
+            },
+            None => return Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
+        }
+    }
+
+    /// Prints the argument passed in with a new line after it.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn printn(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.get_arg(1, pos)?;
+        match arg1 {
+            Some(value) => {
+                println!("{:#?}", value);
+                Ok(None)
+            },
+            None => return Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
         }
     }
 
