@@ -36,6 +36,10 @@ The instructions that DarkVM currently supports are:
   - gte
   - eq
   - neq
+  - jmp
+  - rjmp
+  - jmpt
+  - jmpf
 
 ***
 
@@ -192,7 +196,7 @@ The value returned will be the int 0 because 1 / 2 = 0 with integer division. If
 
 **The Lt Instruction**
 
-The Lt instruction takes two parameters
+The Lt instruction takes two parameters.
 
 Example:
 ```
@@ -215,7 +219,7 @@ The value returned will be the boolean true because 1 < 5.
 
 **The Lte Instruction**
 
-The Lte instruction takes two parameters
+The Lte instruction takes two parameters.
 
 Example:
 ```
@@ -238,7 +242,7 @@ The value returned will be the boolean true because 5 <= 5.
 
 **The Gt Instruction**
 
-The Gt instruction takes two parameters
+The Gt instruction takes two parameters.
 
 Example:
 ```
@@ -261,7 +265,7 @@ The value returned will be the boolean false because 1 < 5.
 
 **The Gte Instruction**
 
-The Gte instruction takes two parameters
+The Gte instruction takes two parameters.
 
 Example:
 ```
@@ -284,7 +288,7 @@ The value returned will be the boolean true because 5 >= 5.
 
 **The Eq Instruction**
 
-The Eq instruction takes two parameters
+The Eq instruction takes two parameters.
 
 Example:
 ```
@@ -307,7 +311,7 @@ The value returned will be the boolean false because 1 != 5.
 
 **The Neq Instruction**
 
-The Neq instruction takes two parameters
+The Neq instruction takes two parameters.
 
 Example:
 ```
@@ -327,6 +331,111 @@ After this instruction, the stack will look like this:
 ```
 
 The value returned will be the boolean false because 5 == 5.
+
+**The Jmp Instruction**
+
+The Jmp Instruction takes one parameter.
+
+Example:
+```
+jmp 1
+```
+
+> The jmp instruction checks if the parameter passed is within the bounds of the program, and if it is, it jump to the location specified.
+
+Example:
+```
+jmp 4
+push "Failed"
+push "Succeeded"
+```
+
+After this instruction, the stack will look like this:
+```
+["Succeeded"]
+```
+
+No value is returned from the jmp instruction.
+
+**The Rjmp Instruction**
+
+The Rjmp Instruction takes one parameter.
+
+Example:
+```
+rjmp 1
+```
+
+> The rjmp instruction checks if the current location + the parameter passed is within the bounds of the program, and if it is, it jump to the current location + the location specified.
+> This parameter can be positive or negative as long as the sum is within the bounds.
+
+Example:
+```
+rjmp 4
+push "Failed"
+push "Succeeded"
+```
+
+After this instruction, the stack will look like this:
+```
+["Succeeded"]
+```
+
+No value is returned from the rjmp instruction.
+
+**The Jmpt Instruction**
+
+The Jmpt Instruction takes one parameter.
+
+Example:
+```
+push true
+jmpt 3
+```
+
+> The jmpt instruction first checks if the top value on the stack is true. If it is, it checks if the parameter passed is within the bounds of the program, and if it is, it jump to the location specified.
+
+Example:
+```
+push true
+jmpt 6
+push "Failed"
+push "Succeeded"
+```
+
+After this instruction, the stack will look like this:
+```
+["Succeeded", true]
+```
+
+No value is returned from the jmpt instruction.
+
+**The Jmpf Instruction**
+
+The Jmpf Instruction takes one parameter.
+
+Example:
+```
+push false
+jmpf 3
+```
+
+> The jmpf instruction first checks if the top value on the stack is false. If it is, it checks if the parameter passed is within the bounds of the program, and if it is, it jump to the location specified.
+
+Example:
+```
+push false
+jmpf 6
+push "Failed"
+push "Succeeded"
+```
+
+After this instruction, the stack will look like this:
+```
+["Succeeded", false]
+```
+
+No value is returned from the jmpf instruction.
 
 **Comments In DarkVM**
 

@@ -1,7 +1,5 @@
 //! The Error struct maintains the errors that occur during execution.
 
-use crate::values::values::ValueKind;
-
 pub struct Error {
     kind: ErrorKind,
     position: usize,
@@ -85,9 +83,10 @@ pub enum ErrorKind {
     UnterminatedString,
     EmptyStack,
     ExpectedArgs(usize),
-    TypeMismatch(ValueKind, ValueKind),
+    TypeMismatch(String, String),
     UnsupportedOperation(String, String),
     DivisionByZero,
+    OutOfBounds(usize, usize),
 }
 
 /// Converts the ErrorKind into a String.
@@ -113,11 +112,13 @@ impl Into<String> for ErrorKind {
             ErrorKind::TypeMismatch(expected, actual) => {
                 return format!(
                     "Expected The Type {:#?}, But Found The Type {:#?}.",
-                    expected, actual
+                    expected,
+                    actual,
                 )
             },
             ErrorKind::UnsupportedOperation(operation, operand) => return format!("The Operation '{}' Can Not Be Applied To {}", operation, operand),
             ErrorKind::DivisionByZero => "Tried To Divide By 0.",
+            ErrorKind::OutOfBounds(beginning, end) => return format!("An Invalid Index Was Given. The Index Has To Be Between {} And {} Exclusive.", beginning, end),
         }
         .to_owned()
     }
