@@ -437,6 +437,61 @@ After this instruction, the stack will look like this:
 
 No value is returned from the jmpf instruction.
 
+**The Print Instruction**
+
+The Print Instruction takes one parameter.
+
+Example:
+```
+print "Hello, World!"
+```
+
+> The print instruction prints out the parameter. It does not, however, print a new line character after. If you desire that behavior, check out the "printn" instruction.
+
+Example:
+```
+push 1
+push 1
+push add
+print "1 + 1 = "
+print pop
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+No value is returned from the print instruction.
+
+**The Printn Instruction**
+
+The Printn Instruction takes one parameter.
+
+Example:
+```
+printn "Hello, World!"
+```
+
+> The printn instruction prints out the parameter with the new line character after.
+
+Example:
+```
+printn "Hello, World!"
+push 1
+push 1
+push add
+printn "1 + 1 = "
+printn pop
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+No value is returned from the print instruction.
+
 **Comments In DarkVM**
 
 DarkVM supports both single line and multiline comments.

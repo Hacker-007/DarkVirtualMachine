@@ -30,6 +30,8 @@ pub enum ValueKind {
     RelativeJump,
     JumpIfTrue,
     JumpIfFalse,
+    Print,
+    PrintNewLine,
 }
 
 impl ValueKind {
@@ -61,6 +63,8 @@ impl ValueKind {
             ValueKind::RelativeJump => "Instruction JumpRelative",
             ValueKind::JumpIfTrue => "Instruction JumpIfTrue",
             ValueKind::JumpIfFalse => "Instruction JumpIfFalse",
+            ValueKind::Print => "Instruction Print",
+            ValueKind::PrintNewLine => "Instruction PrintNewLine",
         }.to_owned()
     }
 }
@@ -91,6 +95,8 @@ impl fmt::Debug for ValueKind {
             ValueKind::RelativeJump => write!(f, "<instruction rjmp>"),
             ValueKind::JumpIfTrue => write!(f, "<instruction jmpt>"),
             ValueKind::JumpIfFalse => write!(f, "<instruction jmpf>"),
+            ValueKind::Print => write!(f, "<instruction print>"),
+            ValueKind::PrintNewLine => write!(f, "<instruction printn>"),
         }
     }
 }
