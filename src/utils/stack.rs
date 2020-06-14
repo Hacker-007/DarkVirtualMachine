@@ -29,4 +29,14 @@ impl<T: Debug + PartialEq> Stack<T> {
     pub fn pop(&mut self, pos: usize) -> Result<T, Error> {
         self.0.pop().ok_or(Error::new(ErrorKind::EmptyStack, pos))
     }
+
+    /// This function returns a reference to the top value on the stack, without consuming it.
+    /// If the stack is empty, None is returned.
+    pub fn peek(&self) -> Option<&T> {
+        if self.0.is_empty() {
+            None
+        } else {
+            self.0.first()
+        }
+    }
 }

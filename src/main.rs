@@ -60,7 +60,7 @@ fn run(contents: &str) -> Result<VM, String> {
 #[test]
 fn test_push_instrution() {
     use std::rc::Rc;
-    use crate::values::values::{Value, ValueKind};
+    use crate::values::{values::Value, value_kinds::ValueKind};
 
     let contents = "push 1";
     let result = run(contents);
@@ -74,7 +74,7 @@ fn test_push_instrution() {
 #[test]
 fn test_pop_instrution() {
     use std::rc::Rc;
-    use crate::values::values::{Value, ValueKind};
+    use crate::values::{values::Value, value_kinds::ValueKind};
 
     let contents = "push 1\npop";
     let result = run(contents);

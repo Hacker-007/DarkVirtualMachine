@@ -31,6 +31,7 @@ pub enum TokenKind {
     BooleanLiteral(bool),
     StringLiteral(String),
     Identifier(String),
+
     Push,
     Pop,
     Add,
@@ -43,6 +44,10 @@ pub enum TokenKind {
     GreaterThanEqual,
     Equal,
     NotEqual,
+    Jump,
+    RelativeJump,
+    JumpIfTrue,
+    JumpIfFalse,
 }
 
 impl TokenKind {
@@ -65,6 +70,10 @@ impl TokenKind {
             "gte"  => Some(TokenKind::GreaterThanEqual),
             "eq"   => Some(TokenKind::Equal),
             "neq"  => Some(TokenKind::NotEqual),
+            "jmp"  => Some(TokenKind::Jump),
+            "rjmp" => Some(TokenKind::RelativeJump),
+            "jmpt" => Some(TokenKind::JumpIfTrue),
+            "jmpf" => Some(TokenKind::JumpIfFalse),
             
             _ => None,
         }
