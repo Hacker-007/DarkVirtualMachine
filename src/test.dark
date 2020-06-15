@@ -1,1 +1,3 @@
-printn "Hello, World!"
+@main
+    printn "Hello, World!"
+end

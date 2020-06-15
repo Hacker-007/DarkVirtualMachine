@@ -248,6 +248,8 @@ impl From<Token> for Value {
                 TokenKind::BooleanLiteral(value) => ValueKind::Boolean(value),
                 TokenKind::StringLiteral(value) => ValueKind::String(value),
                 TokenKind::Identifier(name) => ValueKind::Variable(name, Rc::new(Value::new(token.pos, ValueKind::Void))),
+                TokenKind::Label(name) => ValueKind::Label(name),
+                TokenKind::End => ValueKind::End,
 
                 TokenKind::Push => ValueKind::Push,
                 TokenKind::Pop => ValueKind::Pop,

@@ -48,7 +48,7 @@ fn main() {
 /// The errors produced can be found in the utils::error::ErrorKind enum.
 fn run(contents: &str) -> Result<VM, String> {
     let tokens = Lexer::new().lex(contents).map_err(|error| error.prettify(contents))?;
-    let mut vm = VM::new(tokens);
+    let mut vm = VM::new(tokens).map_err(|error| error.prettify(contents))?;
     let result = vm.run().map_err(|error| error.prettify(contents))?;
     if result.is_some() {
         println!("{:#?}\n", result);
@@ -67,8 +67,8 @@ fn test_push_instrution() {
     assert!(result.is_ok());
     
     let vm = result.unwrap();
-    assert_eq!(vm.stack.0.len(), 1);
-    assert!(vm.stack.0.iter().any(|value| value == &value!(ValueKind::Int(1))))
+    assert_eq!(vm.operand_stack.0.len(), 1);
+    assert!(vm.operand_stack.0.iter().any(|value| value == &value!(ValueKind::Int(1))))
 }
 
 #[test]
@@ -81,6 +81,6 @@ fn test_pop_instrution() {
     assert!(result.is_ok());
     
     let vm = result.unwrap();
-    assert_eq!(vm.stack.0.len(), 0);
-    assert!(!vm.stack.0.iter().any(|value| value == &value!(ValueKind::Int(1))))
+    assert_eq!(vm.operand_stack.0.len(), 0);
+    assert!(!vm.operand_stack.0.iter().any(|value| value == &value!(ValueKind::Int(1))))
 }

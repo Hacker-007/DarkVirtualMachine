@@ -19,7 +19,7 @@ use crate::{
     utils::{
         error::{Error, ErrorKind},
         stack::Stack,
-        token::Token,
+        token::Token, frames::Frame,
     },
     values::{values::Value, value_kinds::ValueKind},
 };
@@ -29,7 +29,8 @@ use std::{collections::VecDeque, rc::Rc};
 #[derive(Debug)]
 pub struct VM {
     code: Code,
-    pub stack: Stack<Rc<Value>>,
+    pub operand_stack: Stack<Rc<Value>>,
+    call_stack: Stack<Frame>,
 }
 
 impl VM {
@@ -39,11 +40,17 @@ impl VM {
     ///
     /// # Arguments
     /// `tokens` - The tokens produced by the lexer.
-    pub fn new(tokens: VecDeque<Token>) -> VM {
-        VM {
-            code: Code::new(tokens),
-            stack: Stack::new(),
-        }
+    pub fn new(tokens: VecDeque<Token>) -> Result<VM, Error> {
+        let code = Code::new(tokens)?;
+        
+        let main_frame = Frame::new(0, "main");
+        let mut call_stack = Stack::new();
+        call_stack.push(main_frame);
+        Ok(VM {
+            code,
+            operand_stack: Stack::new(),
+            call_stack,
+        })
     }
 
     /// Runs the VM until the end of the code.
@@ -56,7 +63,7 @@ impl VM {
             if self.is_finished() {
                 return Ok(None);
             }
-
+            
             let next = self.next().unwrap();
             let result = self.evaluate_value(next)?;
             if self.is_finished() && result.is_some() {
@@ -76,6 +83,29 @@ impl VM {
 
             // Cloning here is cheap because val is reference counted, so only a counter is incremented.
             ValueKind::Variable(_, val) => Ok(Some(val.clone())),
+            ValueKind::Label(_) => {
+                let mut found_end = false;
+                while let Some(value) = self.next() {
+                    if let ValueKind::End = value.kind {
+                        found_end = true;
+                        break;
+                    }
+                }
+
+                if !found_end {
+                    Err(Error::new(ErrorKind::NoEndOfLabel, value.pos))
+                } else {
+                    Ok(None)
+                }
+            },
+            ValueKind::End => {
+                let frame = self.call_stack.pop(value.pos)?;
+                if let Some(error) = self.code.jump(frame.caller_position as i64, value.pos) {
+                    Err(error)
+                } else {
+                    Ok(None)
+                }
+            },
 
             ValueKind::Push => self.push(value.pos),
             ValueKind::Pop => self.pop(value.pos).map(|(_, value)| value),
@@ -110,7 +140,7 @@ impl VM {
         
         // If the argument does not exist, return an error, otherwise push it on to the stack.
         match arg {
-            Some(value) => self.stack.push(value),
+            Some(value) => self.operand_stack.push(value),
             None => {
                 return Err(Error::new(
                     ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()),
@@ -129,7 +159,7 @@ impl VM {
     fn pop(&mut self, pos: usize) -> Result<(usize, Option<Rc<Value>>), Error> {
         // Pop the value and if there are no errors, map it to an option with the value.
         // stack.pop takes the position where the instruction was used in the case that the stack was empty.
-        self.stack.pop(pos).map(|val| (val.pos, Some(val)))
+        self.operand_stack.pop(pos).map(|val| (val.pos, Some(val)))
     }
 
     /// Pops the top two values from the stack and adds them together.
@@ -346,7 +376,7 @@ impl VM {
     /// # Arguments
     /// `pos` - The position where this instruction was called.
     fn jmpt(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
-        match self.stack.peek() {
+        match self.operand_stack.peek() {
             Some(value) if value.is_truthy() => self.jmp(pos),
             None => Err(Error::new(ErrorKind::EmptyStack, pos)),
             _ => Ok(None)
@@ -363,7 +393,7 @@ impl VM {
     /// # Arguments
     /// `pos` - The position where this instruction was called.
     fn jmpf(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
-        match self.stack.peek() {
+        match self.operand_stack.peek() {
             Some(value) if !value.is_truthy() => self.jmp(pos),
             None => Err(Error::new(ErrorKind::EmptyStack, pos)),
             _ => Ok(None)
@@ -426,6 +456,6 @@ impl VM {
     /// Checks if there are any more values left.
     /// This method needs to be abstracted away because Rust will complain with the message that self.code was mutabley borrowed more than once.
     fn is_finished(&self) -> bool {
-        self.code.is_finished()
+        self.code.is_finished() || self.call_stack.len() == 0
     }
 }

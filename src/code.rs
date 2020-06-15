@@ -2,13 +2,14 @@
 //! In the future, it should maintain labels, constants, and other information about the code.
 //! This Code struct is called internally and should not be called from the outside.
 
-use crate::{utils::{error::{ErrorKind, Error}, token::Token}, values::values::Value};
-use std::{collections::VecDeque, rc::Rc};
+use crate::{utils::{error::{ErrorKind, Error}, token::{TokenKind, Token}}, values::values::Value};
+use std::{collections::{HashMap, VecDeque}, rc::Rc};
 
 #[derive(Debug)]
 pub struct Code {
     value_pointer: usize,
     values: VecDeque<Rc<Value>>,
+    labels: HashMap<String, usize>,
 }
 
 impl Code {
@@ -17,13 +18,31 @@ impl Code {
     ///
     /// # Arguments
     /// `tokens` - The tokens from the lexer.
-    pub fn new(tokens: VecDeque<Token>) -> Code {
-        Code {
-            value_pointer: 0,
-            values: tokens
-                .into_iter()
-                .map(|token| Rc::new(token.into()))
-                .collect::<VecDeque<_>>(),
+    pub fn new(tokens: VecDeque<Token>) -> Result<Code, Error> {
+        let mut labels = HashMap::new();
+        let mut values = VecDeque::new();
+        let mut iter = tokens.into_iter().enumerate();
+        while let Some((pos, token)) = iter.next() {
+            match &token.kind {
+                TokenKind::Label(name) => {
+                    if let Some(_) = labels.insert(name.to_owned(), pos) {
+                        return Err(Error::new(ErrorKind::DuplicateLabel, token.pos));
+                    } else {
+                        values.push_back(Rc::new(token.into()));
+                    }
+                },
+                _ => values.push_back(Rc::new(token.into())),
+            };
+        }
+
+        if let Some(&value_pointer) = labels.get(&"main".to_owned()) {
+            Ok(Code {
+                value_pointer: value_pointer + 1,
+                values,
+                labels,
+            })
+        } else {
+            Err(Error::message_only(ErrorKind::NoMainLabel))
         }
     }
 
@@ -70,6 +89,6 @@ impl Code {
 
     /// This function returns true if there are no more values in the Code struct.
     pub fn is_finished(&self) -> bool {
-        self.value_pointer == self.values.len()
+        self.value_pointer >= self.values.len()
     }
 }
