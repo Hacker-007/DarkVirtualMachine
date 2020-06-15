@@ -39,4 +39,9 @@ impl<T: Debug + PartialEq> Stack<T> {
             self.0.first()
         }
     }
+
+    /// This function returns the number of elements in the stack.
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
 }

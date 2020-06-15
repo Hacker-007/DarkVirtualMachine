@@ -51,6 +51,7 @@ impl Lexer {
             match ch {
                 '0'..='9' | '-' => tokens.push_back(self.make_number(ch, &mut iter)?),
                 '\'' | '"' => tokens.push_back(self.make_string(ch, &mut iter)?),
+                '@' => tokens.push_back(self.make_label(&mut iter)?),
                 letter if ch.is_ascii_alphabetic() => tokens.push_back(self.make_word(letter, &mut iter)),
                 _ => {
                     return Err(Error::new(
@@ -134,6 +135,8 @@ impl Lexer {
             Token::new(TokenKind::BooleanLiteral(true), initial_point)
         } else if word.eq_ignore_ascii_case(&"false") {
             Token::new(TokenKind::BooleanLiteral(false), initial_point)
+        } else if word.eq_ignore_ascii_case(&"end") {
+            Token::new(TokenKind::End, initial_point)
         } else if let Some(instruction) = TokenKind::is_instruction(&word) {
             Token::new(instruction, initial_point)
         } else {
@@ -141,7 +144,7 @@ impl Lexer {
         }
     }
 
-    /// This function produces an string or an error.
+    /// This function produces a string or an error.
     ///
     /// # Arguments
     /// * `beginning_of_string` - The first opening quote used to begin the string. This could be ' or ".
@@ -169,6 +172,28 @@ impl Lexer {
             Err(Error::new(ErrorKind::UnterminatedString, initial_point))
         } else {
             Ok(Token::new(TokenKind::StringLiteral(string), initial_point))
+        }
+    }
+
+    /// This function produces a label or an error.
+    ///
+    /// # Arguments
+    /// * `iter` - The iterator which contains all of the characters.
+    fn make_label(&mut self, iter: &mut Peekable<Chars>) -> Result<Token, Error> {
+        let initial_point = self.current_position;
+        let mut label = String::new();
+        while let Some(ch) = iter.peek() {
+            if ch.is_ascii_whitespace() || ch.is_ascii_digit() {
+                break;
+            } else {
+                label.push(self.advance(iter));
+            }
+        }
+
+        if label.len() == 0 {
+            Err(Error::new(ErrorKind::InvalidLabelName, initial_point))
+        } else {
+            Ok(Token::new(TokenKind::Label(label), initial_point))
         }
     }
 

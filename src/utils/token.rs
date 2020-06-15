@@ -31,6 +31,8 @@ pub enum TokenKind {
     BooleanLiteral(bool),
     StringLiteral(String),
     Identifier(String),
+    Label(String),
+    End,
 
     Push,
     Pop,
