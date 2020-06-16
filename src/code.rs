@@ -2,7 +2,7 @@
 //! In the future, it should maintain labels, constants, and other information about the code.
 //! This Code struct is called internally and should not be called from the outside.
 
-use crate::{utils::{error::{ErrorKind, Error}, token::{TokenKind, Token}}, values::values::Value};
+use crate::{errors::{error::Error, error_kind::ErrorKind}, tokens::{token_kind::TokenKind, token::Token}, values::values::Value};
 use std::{collections::{HashMap, VecDeque}, rc::Rc};
 
 #[derive(Debug)]

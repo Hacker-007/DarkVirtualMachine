@@ -1,5 +1,5 @@
-//! The ValueKind enum maintains the various types in the language.
-//! All of the supported types are in this enum. This makes it easy to expand in the future.
+//! The ValueKind enum maintains the various values in the language.
+//! All of the supported values are in this enum. This makes it easy to expand in the future.
 
 use std::{fmt, rc::Rc};
 use super::values::Value;
@@ -37,10 +37,10 @@ pub enum ValueKind {
 }
 
 impl ValueKind {
-    /// This function gets the name of the type.
-    /// For example, an int with the value of 15, will have the type name 'Int'.
+    /// This function gets the name of the value.
+    /// For example, an int with the value of 15, will have the value name 'Int'.
     /// This method is used to provide the right error messages.
-    pub fn get_type_name(&self) -> String {
+    pub fn get_value_name(&self) -> String {
         match self {
             ValueKind::Void => "Void",
             ValueKind::Any => "Any",
@@ -48,7 +48,7 @@ impl ValueKind {
             ValueKind::Float(_) => "Float",
             ValueKind::Boolean(_) => "Boolean",
             ValueKind::String(_) => "String",
-            ValueKind::Variable(_, value) => return value.kind.get_type_name(),
+            ValueKind::Variable(_, value) => return value.kind.get_value_name(),
             ValueKind::Label(_) => "Label",
             ValueKind::End => "End",
             ValueKind::Push => "Instruction Push",
