@@ -13,8 +13,8 @@
 //! ```
 
 use crate::{
-    utils::error::{Error, ErrorKind},
-    utils::token::{Token, TokenKind},
+    errors::{error::Error, error_kind::ErrorKind},
+    tokens::{token::Token, token_kind::TokenKind},
 };
 
 use std::{collections::VecDeque, iter::Peekable, str::Chars};
@@ -75,7 +75,7 @@ impl Lexer {
         let mut number = digit.to_string();
         let mut has_decimal_point = false;
         while let Some(ch) = iter.peek() {
-            // After the type of the character has been identified, it is important to remember to advance the iterator.
+            // After the value of the character has been identified, it is important to remember to advance the iterator.
             // Otherwise, an infinite loop will be generated.
             if ch.is_ascii_digit() {
                 number.push(self.advance(iter));
@@ -109,7 +109,7 @@ impl Lexer {
         }
     }
 
-    /// This function produces an instruction, identifier, a special type, or a boolean. This funtion always succeeds because a word is always an identifier.
+    /// This function produces an instruction, identifier, a special value, or a boolean. This funtion always succeeds because a word is always an identifier.
     ///
     /// # Arguments
     /// * `letter` - The first letter of the word.

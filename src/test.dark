@@ -1,3 +1,6 @@
 @main
     printn "Hello, World!"
+    @do_not_run
+        printn "Failed."
+    end
 end

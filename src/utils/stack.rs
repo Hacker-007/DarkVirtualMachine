@@ -3,7 +3,7 @@
 //! These methods should not be accessed outside of the VM struct as it could cause unexpected behavior.
 
 use std::fmt::Debug;
-use super::error::{ErrorKind, Error};
+use crate::errors::{error::Error, error_kind::ErrorKind};
 
 #[derive(Debug)]
 pub struct Stack<T: Debug + PartialEq>(pub Vec<T>);

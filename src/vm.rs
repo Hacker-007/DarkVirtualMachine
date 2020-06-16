@@ -16,10 +16,11 @@
 
 use crate::{
     code::Code,
+    errors::{error::Error, error_kind::ErrorKind},
+    tokens::token::Token,
     utils::{
-        error::{Error, ErrorKind},
         stack::Stack,
-        token::Token, frames::Frame,
+        frames::Frame,
     },
     values::{values::Value, value_kinds::ValueKind},
 };
@@ -143,7 +144,7 @@ impl VM {
             Some(value) => self.operand_stack.push(value),
             None => {
                 return Err(Error::new(
-                    ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()),
+                    ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()),
                     pos,
                 ))
             }
@@ -173,8 +174,8 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.add(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_2))
+            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
         }
     }
 
@@ -189,8 +190,8 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.sub(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_2))
+            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
         }
     }
 
@@ -205,8 +206,8 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.mul(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_2))
+            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
         }
     }
 
@@ -221,8 +222,8 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.div(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_2))
+            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
         }
     }
 
@@ -236,8 +237,8 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.lt(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_2))
+            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
         }
     }
 
@@ -251,8 +252,8 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.lte(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_2))
+            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
         }
     }
 
@@ -266,8 +267,8 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.gt(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_2))
+            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
         }
     }
 
@@ -281,8 +282,8 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.gte(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_2))
+            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
         }
     }
 
@@ -296,8 +297,8 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.equal(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_2))
+            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
         }
     }
 
@@ -311,8 +312,8 @@ impl VM {
 
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1.not_equal(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_2))
+            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
         }
     }
 
@@ -335,10 +336,10 @@ impl VM {
                         Ok(None)
                     }
                 } else {
-                    return Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Int(0).get_type_name(), value.kind.get_type_name()), arg_pos_1));
+                    return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Int(0).get_value_name(), value.kind.get_value_name()), arg_pos_1));
                 }
             },
-            None => return Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Int(0).get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
+            None => return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Int(0).get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
         }
     }
 
@@ -359,10 +360,10 @@ impl VM {
                         Ok(None)
                     }
                 } else {
-                    return Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Int(0).get_type_name(), value.kind.get_type_name()), arg_pos_1));
+                    return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Int(0).get_value_name(), value.kind.get_value_name()), arg_pos_1));
                 }
             },
-            None => return Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Int(0).get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
+            None => return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Int(0).get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
         }
     }
 
@@ -411,7 +412,7 @@ impl VM {
                 print!("{:#?}", value);
                 Ok(None)
             },
-            None => return Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
+            None => return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
         }
     }
 
@@ -426,7 +427,7 @@ impl VM {
                 println!("{:#?}", value);
                 Ok(None)
             },
-            None => return Err(Error::new(ErrorKind::TypeMismatch(ValueKind::Any.get_type_name(), ValueKind::Void.get_type_name()), arg_pos_1)),
+            None => return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
         }
     }
 

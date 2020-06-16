@@ -1,6 +1,6 @@
-use crate::utils::{error::{ErrorKind, Error}, token::{Token, TokenKind}};
 use std::{fmt, rc::Rc};
 use super::value_kinds::ValueKind;
+use crate::{tokens::{token_kind::TokenKind, token::Token}, errors::{error_kind::ErrorKind, error::Error}};
 
 /// The Value struct maintains both the position where this value is used and its kind.
 /// Maintaining the position is useful because it can be used to produce good error messages.
@@ -16,7 +16,7 @@ impl Value {
     ///
     /// # Arguments
     /// `pos` - The position where this value is created or called.
-    /// `kind` - The type of this value.
+    /// `kind` - The value of this value.
     pub fn new(pos: usize, kind: ValueKind) -> Value {
         Value { pos, kind }
     }
@@ -40,7 +40,7 @@ impl Value {
             (ValueKind::Float(val1), ValueKind::Int(val2)) => Ok(Value::new(pos, ValueKind::Float(val1 + *val2 as f64))),
             (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Float(val1 + val2))),
             
-            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Add".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Add".to_owned(), format!("The Value '{}' And The Value '{}'.", self.kind.get_value_name(), other.kind.get_value_name())), pos)),
         }
     }
 
@@ -57,7 +57,7 @@ impl Value {
             (ValueKind::Float(val1), ValueKind::Int(val2)) => Ok(Value::new(pos, ValueKind::Float(val1 - *val2 as f64))),
             (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Float(val1 - val2))),
             
-            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Sub".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Sub".to_owned(), format!("The Value '{}' And The Value '{}'.", self.kind.get_value_name(), other.kind.get_value_name())), pos)),
         }
     }
 
@@ -77,7 +77,7 @@ impl Value {
             (ValueKind::Float(val1), ValueKind::Int(val2)) => Ok(Value::new(pos, ValueKind::Float(val1 * *val2 as f64))),
             (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Float(val1 * val2))),
             
-            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Mul".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Mul".to_owned(), format!("The Value '{}' And The Value '{}'.", self.kind.get_value_name(), other.kind.get_value_name())), pos)),
         }
     }
 
@@ -118,7 +118,7 @@ impl Value {
                 }
             }
             
-            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Div".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Div".to_owned(), format!("The Value '{}' And The Value '{}'.", self.kind.get_value_name(), other.kind.get_value_name())), pos)),
         }
     }
 
@@ -134,7 +134,7 @@ impl Value {
             (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 < val2))),
             (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 < val2))),
 
-            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Lt".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Lt".to_owned(), format!("The Value '{}' And The Value '{}'.", self.kind.get_value_name(), other.kind.get_value_name())), pos)),
         }
     }
 
@@ -150,7 +150,7 @@ impl Value {
             (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 <= val2))),
             (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 <= val2))),
 
-            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Lte".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Lte".to_owned(), format!("The Value '{}' And The Value '{}'.", self.kind.get_value_name(), other.kind.get_value_name())), pos)),
         }
     }
 
@@ -166,7 +166,7 @@ impl Value {
             (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 > val2))),
             (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 > val2))),
 
-            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Gt".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Gt".to_owned(), format!("The Value '{}' And The Value '{}'.", self.kind.get_value_name(), other.kind.get_value_name())), pos)),
         }
     }
 
@@ -182,7 +182,7 @@ impl Value {
             (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 >= val2))),
             (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 >= val2))),
 
-            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Gte".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Gte".to_owned(), format!("The Value '{}' And The Value '{}'.", self.kind.get_value_name(), other.kind.get_value_name())), pos)),
         }
     }
 
@@ -199,7 +199,7 @@ impl Value {
             (ValueKind::Boolean(val1), ValueKind::Boolean(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 == val2))),
             (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 == val2))),
 
-            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Eq".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Eq".to_owned(), format!("The Value '{}' And The Value '{}'.", self.kind.get_value_name(), other.kind.get_value_name())), pos)),
         }
     }
 
@@ -216,14 +216,14 @@ impl Value {
             (ValueKind::Boolean(val1), ValueKind::Boolean(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 != val2))),
             (ValueKind::String(val1), ValueKind::String(val2)) => Ok(Value::new(pos, ValueKind::Boolean(val1 != val2))),
 
-            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Neq".to_owned(), format!("The Type '{}' And The Type '{}'.", self.kind.get_type_name(), other.kind.get_type_name())), pos)),
+            _ => Err(Error::new(ErrorKind::UnsupportedOperation("Neq".to_owned(), format!("The Value '{}' And The Value '{}'.", self.kind.get_value_name(), other.kind.get_value_name())), pos)),
         }
     }
 
     /// This function takes the current value and returns if it is "truthy".
-    /// This can mean different things for differet types. For ints, it is whether it is not 0.
+    /// This can mean different things for differet values. For ints, it is whether it is not 0.
     /// For floats, it is whether it is not NAN, infinite, and not 0. For strings, it is whether
-    /// it is not empty. Every other type is considered to be false.
+    /// it is not empty. Every other value is considered to be false.
     pub fn is_truthy(&self) -> bool {
         match &self.kind {
             ValueKind::Int(value) => value != &0,
