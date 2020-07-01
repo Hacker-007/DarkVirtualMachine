@@ -7,7 +7,7 @@
 //! ```
 //! # fn run() -> Result<(), Error> {
 //! let contents = "push 1";
-//! let tokens = Lexer::new().lex(contents)?;
+//! let tokens = Lexer::default().lex(contents)?;
 //! # Ok(())
 //! # }
 //! ```
@@ -19,18 +19,12 @@ use crate::{
 
 use std::{collections::VecDeque, iter::Peekable, str::Chars};
 
+#[derive(Default)]
 pub struct Lexer {
     current_position: usize,
 }
 
 impl Lexer {
-    /// Constructs a new lexer with the current position set to 0 (the first token).
-    pub fn new() -> Lexer {
-        Lexer {
-            current_position: 0,
-        }
-    }
-
     /// This function lexes the input and returns either a VecDeque of tokens or an error.
     /// The return value of this function may change to returning a vector of errors.
     ///
@@ -52,7 +46,9 @@ impl Lexer {
                 '0'..='9' | '-' => tokens.push_back(self.make_number(ch, &mut iter)?),
                 '\'' | '"' => tokens.push_back(self.make_string(ch, &mut iter)?),
                 '@' => tokens.push_back(self.make_label(&mut iter)?),
-                letter if ch.is_ascii_alphabetic() => tokens.push_back(self.make_word(letter, &mut iter)),
+                letter if ch.is_ascii_alphabetic() => {
+                    tokens.push_back(self.make_word(letter, &mut iter))
+                }
                 _ => {
                     return Err(Error::new(
                         ErrorKind::UnknownCharacter,
@@ -97,15 +93,13 @@ impl Lexer {
                     self.current_position,
                 ))
             }
+        } else if let Ok(value) = number.parse() {
+            Ok(Token::new(TokenKind::FloatLiteral(value), initial_point))
         } else {
-            if let Ok(value) = number.parse() {
-                Ok(Token::new(TokenKind::FloatLiteral(value), initial_point))
-            } else {
-                Err(Error::new(
-                    ErrorKind::InvalidNumberFormat,
-                    self.current_position,
-                ))
-            }
+            Err(Error::new(
+                ErrorKind::InvalidNumberFormat,
+                self.current_position,
+            ))
         }
     }
 
@@ -183,14 +177,14 @@ impl Lexer {
         let initial_point = self.current_position;
         let mut label = String::new();
         while let Some(ch) = iter.peek() {
-            if ch.is_ascii_whitespace() || ch.is_ascii_digit() {
+            if ch.is_ascii_whitespace() {
                 break;
             } else {
                 label.push(self.advance(iter));
             }
         }
 
-        if label.len() == 0 {
+        if label.is_empty() {
             Err(Error::new(ErrorKind::InvalidLabelName, initial_point))
         } else {
             Ok(Token::new(TokenKind::Label(label), initial_point))
@@ -226,7 +220,7 @@ impl Lexer {
     /// * `iter` - The iterator which contains all of the characters.
     fn handle_single_line_comments(&mut self, iter: &mut Peekable<Chars>) {
         self.advance(iter);
-        while let Some(c) = iter.next() {
+        for c in iter {
             self.current_position += 1;
             if c == '\n' {
                 break;

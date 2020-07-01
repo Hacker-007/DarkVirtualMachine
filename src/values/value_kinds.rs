@@ -1,8 +1,8 @@
 //! The ValueKind enum maintains the various values in the language.
 //! All of the supported values are in this enum. This makes it easy to expand in the future.
 
+use super::value::Value;
 use std::{fmt, rc::Rc};
-use super::values::Value;
 
 #[derive(PartialEq)]
 pub enum ValueKind {
@@ -69,7 +69,8 @@ impl ValueKind {
             ValueKind::JumpIfFalse => "Instruction JumpIfFalse",
             ValueKind::Print => "Instruction Print",
             ValueKind::PrintNewLine => "Instruction PrintNewLine",
-        }.to_owned()
+        }
+        .to_owned()
     }
 }
 

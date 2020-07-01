@@ -18,6 +18,8 @@ pub enum ErrorKind {
     NoEndOfLabel,
     DivisionByZero,
     OutOfBounds(usize, usize),
+    DuplicateVariable,
+    UndefinedVariable,
 }
 
 /// Converts the ErrorKind into a String.
@@ -48,14 +50,25 @@ impl Into<String> for ErrorKind {
             ErrorKind::ValueMismatch(expected, actual) => {
                 return format!(
                     "Expected The Value {:#?}, But Found The Value {:#?}.",
-                    expected,
-                    actual,
+                    expected, actual,
                 )
-            },
-            ErrorKind::UnsupportedOperation(operation, operand) => return format!("The Operation '{}' Can Not Be Applied To {}", operation, operand),
+            }
+            ErrorKind::UnsupportedOperation(operation, operand) => {
+                return format!(
+                    "The Operation '{}' Can Not Be Applied To {}",
+                    operation, operand
+                )
+            }
             ErrorKind::NoEndOfLabel => "No 'end' Could Be Found To This Label.",
             ErrorKind::DivisionByZero => "Tried To Divide By 0.",
-            ErrorKind::OutOfBounds(beginning, end) => return format!("An Invalid Index Was Given. The Index Has To Be Between {} And {} Exclusive.", beginning, end),
+            ErrorKind::OutOfBounds(beginning, end) => {
+                return format!(
+                    "An Invalid Index Was Given. The Index Has To Be Between {} And {} Exclusive.",
+                    beginning, end
+                )
+            }
+            ErrorKind::DuplicateVariable => "Another Variable With This Name Was Defined Already.",
+            ErrorKind::UndefinedVariable => "Tried To Use A Variable That Has Not Been Defined.",
         }
         .to_owned()
     }

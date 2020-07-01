@@ -2,8 +2,8 @@
 //! The methods on the stack allow the stack to be changed and modified. The owner of the stack is the VM.
 //! These methods should not be accessed outside of the VM struct as it could cause unexpected behavior.
 
-use std::fmt::Debug;
 use crate::errors::{error::Error, error_kind::ErrorKind};
+use std::fmt::Debug;
 
 #[derive(Debug)]
 pub struct Stack<T: Debug + PartialEq>(pub Vec<T>);
@@ -27,7 +27,9 @@ impl<T: Debug + PartialEq> Stack<T> {
     /// # Arguments
     /// `pos` - The position where the pop was called. This is used if there was error.
     pub fn pop(&mut self, pos: usize) -> Result<T, Error> {
-        self.0.pop().ok_or(Error::new(ErrorKind::EmptyStack, pos))
+        self.0
+            .pop()
+            .ok_or_else(|| Error::new(ErrorKind::EmptyStack, pos))
     }
 
     /// This function returns a reference to the top value on the stack, without consuming it.
@@ -40,8 +42,8 @@ impl<T: Debug + PartialEq> Stack<T> {
         }
     }
 
-    /// This function returns the number of elements in the stack.
-    pub fn len(&self) -> usize {
-        self.0.len()
+    /// This function returns true if there are no elements in the stack.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 }

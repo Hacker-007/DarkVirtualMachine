@@ -14,7 +14,10 @@ impl Error {
     /// `kind` - The value of the error. Maintaining the value allows for the messages to be controlled across execution.
     /// `position` - The position where the error occurred.
     pub fn new(kind: ErrorKind, position: usize) -> Error {
-        Error { kind, position: Some(position) }
+        Error {
+            kind,
+            position: Some(position),
+        }
     }
 
     /// Constructs a new error with the error kind and no position.
@@ -22,7 +25,10 @@ impl Error {
     /// # Arguments
     /// `kind` - The value of the error. Maintaining the value allows for the messages to be controlled across execution.
     pub fn message_only(kind: ErrorKind) -> Error {
-        Error { kind, position: None }
+        Error {
+            kind,
+            position: None,
+        }
     }
 
     /// This function generates a pretty version of the error, with arrows pointing to the exact location of the error.
@@ -34,11 +40,11 @@ impl Error {
         if self.position.is_some() {
             // Get the line and column number of where the error occurred.
             let (line_number, column_number) = self.get_line_column_info(input);
-            
+
             // Check if a line is present. If not, the error is printed without the arrows.
             // This should usually produce a line, but it may not.
             let option_line = input.split_terminator('\n').nth(line_number - 1);
-            
+
             // Convert the kind into an error message.
             let error_message: String = self.kind.into();
             if let Some(line) = option_line {
@@ -68,7 +74,7 @@ impl Error {
     /// This function gets the line and column number of where the error occurred with respect to the input.
     fn get_line_column_info(&self, input: &str) -> (usize, usize) {
         let (mut line_number, mut column_number) = (1, 0);
-        
+
         // Go through the characters and find the index that matches the position given in the error struct.
         input.chars().enumerate().find(|(idx, ch)| {
             if ch == &'\n' {
@@ -78,11 +84,7 @@ impl Error {
                 column_number += 1;
             }
 
-            if idx == &(self.position.unwrap() - 1) {
-                true
-            } else {
-                false
-            }
+            idx == &(self.position.unwrap() - 1)
         });
 
         (line_number, column_number)

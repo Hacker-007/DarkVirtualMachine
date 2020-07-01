@@ -18,11 +18,8 @@ use crate::{
     code::Code,
     errors::{error::Error, error_kind::ErrorKind},
     tokens::token::Token,
-    utils::{
-        stack::Stack,
-        frames::Frame,
-    },
-    values::{values::Value, value_kinds::ValueKind},
+    utils::{frames::Frame, stack::Stack},
+    values::{value::Value, value_kinds::ValueKind},
 };
 
 use std::{collections::VecDeque, rc::Rc};
@@ -43,7 +40,7 @@ impl VM {
     /// `tokens` - The tokens produced by the lexer.
     pub fn new(tokens: VecDeque<Token>) -> Result<VM, Error> {
         let code = Code::new(tokens)?;
-        
+
         let main_frame = Frame::new(0, "main");
         let mut call_stack = Stack::new();
         call_stack.push(main_frame);
@@ -64,7 +61,7 @@ impl VM {
             if self.is_finished() {
                 return Ok(None);
             }
-            
+
             let next = self.next().unwrap();
             let result = self.evaluate_value(next)?;
             if self.is_finished() && result.is_some() {
@@ -80,7 +77,10 @@ impl VM {
             ValueKind::Void => Ok(None),
             ValueKind::Any => Ok(None),
 
-            ValueKind::Int(_) | ValueKind::Float(_) | ValueKind::Boolean(_) | ValueKind::String(_) => Ok(Some(value)),
+            ValueKind::Int(_)
+            | ValueKind::Float(_)
+            | ValueKind::Boolean(_)
+            | ValueKind::String(_) => Ok(Some(value)),
 
             // Cloning here is cheap because val is reference counted, so only a counter is incremented.
             ValueKind::Variable(_, val) => Ok(Some(val.clone())),
@@ -98,15 +98,18 @@ impl VM {
                 } else {
                     Ok(None)
                 }
-            },
+            }
             ValueKind::End => {
                 let frame = self.call_stack.pop(value.pos)?;
-                if let Some(error) = self.code.jump(frame.caller_position as i64, value.pos) {
+                if let Some(error) = self
+                    .code
+                    .jump(frame.get_caller_position() as i64, value.pos)
+                {
                     Err(error)
                 } else {
                     Ok(None)
                 }
-            },
+            }
 
             ValueKind::Push => self.push(value.pos),
             ValueKind::Pop => self.pop(value.pos).map(|(_, value)| value),
@@ -138,13 +141,16 @@ impl VM {
     fn push(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
         // Get the next argument. The two parameters passed are useful in the case of errors.
         let (pos, arg) = self.get_arg(1, pos)?;
-        
+
         // If the argument does not exist, return an error, otherwise push it on to the stack.
         match arg {
             Some(value) => self.operand_stack.push(value),
             None => {
                 return Err(Error::new(
-                    ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()),
+                    ErrorKind::ValueMismatch(
+                        ValueKind::Any.get_value_name(),
+                        ValueKind::Void.get_value_name(),
+                    ),
                     pos,
                 ))
             }
@@ -173,9 +179,23 @@ impl VM {
         let (arg_pos_2, arg2) = self.pop(pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1.add(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
+            (Some(operand1), Some(operand2)) => operand1
+                .add(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
         }
     }
 
@@ -189,9 +209,23 @@ impl VM {
         let (arg_pos_2, arg2) = self.pop(pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1.sub(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
+            (Some(operand1), Some(operand2)) => operand1
+                .sub(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
         }
     }
 
@@ -205,9 +239,23 @@ impl VM {
         let (arg_pos_2, arg2) = self.pop(pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1.mul(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
+            (Some(operand1), Some(operand2)) => operand1
+                .mul(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
         }
     }
 
@@ -221,9 +269,23 @@ impl VM {
         let (arg_pos_2, arg2) = self.pop(pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1.div(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
+            (Some(operand1), Some(operand2)) => operand1
+                .div(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
         }
     }
 
@@ -236,9 +298,23 @@ impl VM {
         let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1.lt(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
+            (Some(operand1), Some(operand2)) => operand1
+                .lt(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
         }
     }
 
@@ -251,9 +327,23 @@ impl VM {
         let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1.lte(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
+            (Some(operand1), Some(operand2)) => operand1
+                .lte(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
         }
     }
 
@@ -266,9 +356,23 @@ impl VM {
         let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1.gt(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
+            (Some(operand1), Some(operand2)) => operand1
+                .gt(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
         }
     }
 
@@ -281,9 +385,23 @@ impl VM {
         let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1.gte(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
+            (Some(operand1), Some(operand2)) => operand1
+                .gte(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
         }
     }
 
@@ -296,9 +414,23 @@ impl VM {
         let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1.equal(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
+            (Some(operand1), Some(operand2)) => operand1
+                .equal(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
         }
     }
 
@@ -311,9 +443,23 @@ impl VM {
         let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1.not_equal(operand2.as_ref(), pos).map(|val| Some(Rc::new(val))),
-            (None, _) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
-            (_, None) => Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_2))
+            (Some(operand1), Some(operand2)) => operand1
+                .not_equal(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
         }
     }
 
@@ -336,10 +482,22 @@ impl VM {
                         Ok(None)
                     }
                 } else {
-                    return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Int(0).get_value_name(), value.kind.get_value_name()), arg_pos_1));
+                    Err(Error::new(
+                        ErrorKind::ValueMismatch(
+                            ValueKind::Int(0).get_value_name(),
+                            value.kind.get_value_name(),
+                        ),
+                        arg_pos_1,
+                    ))
                 }
-            },
-            None => return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Int(0).get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            }
+            None => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Int(0).get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
         }
     }
 
@@ -360,10 +518,22 @@ impl VM {
                         Ok(None)
                     }
                 } else {
-                    return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Int(0).get_value_name(), value.kind.get_value_name()), arg_pos_1));
+                    Err(Error::new(
+                        ErrorKind::ValueMismatch(
+                            ValueKind::Int(0).get_value_name(),
+                            value.kind.get_value_name(),
+                        ),
+                        arg_pos_1,
+                    ))
                 }
-            },
-            None => return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Int(0).get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            }
+            None => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Int(0).get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
         }
     }
 
@@ -380,7 +550,7 @@ impl VM {
         match self.operand_stack.peek() {
             Some(value) if value.is_truthy() => self.jmp(pos),
             None => Err(Error::new(ErrorKind::EmptyStack, pos)),
-            _ => Ok(None)
+            _ => Ok(None),
         }
     }
 
@@ -397,7 +567,7 @@ impl VM {
         match self.operand_stack.peek() {
             Some(value) if !value.is_truthy() => self.jmp(pos),
             None => Err(Error::new(ErrorKind::EmptyStack, pos)),
-            _ => Ok(None)
+            _ => Ok(None),
         }
     }
 
@@ -411,8 +581,14 @@ impl VM {
             Some(value) => {
                 print!("{:#?}", value);
                 Ok(None)
-            },
-            None => return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            }
+            None => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
         }
     }
 
@@ -426,8 +602,14 @@ impl VM {
             Some(value) => {
                 println!("{:#?}", value);
                 Ok(None)
-            },
-            None => return Err(Error::new(ErrorKind::ValueMismatch(ValueKind::Any.get_value_name(), ValueKind::Void.get_value_name()), arg_pos_1)),
+            }
+            None => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
         }
     }
 
@@ -444,7 +626,7 @@ impl VM {
     ) -> Result<(usize, Option<Rc<Value>>), Error> {
         let arg = self
             .next()
-            .ok_or(Error::new(ErrorKind::ExpectedArgs(expected_args), pos))?;
+            .ok_or_else(|| Error::new(ErrorKind::ExpectedArgs(expected_args), pos))?;
         Ok((arg.pos, self.evaluate_value(arg)?))
     }
 
@@ -457,6 +639,6 @@ impl VM {
     /// Checks if there are any more values left.
     /// This method needs to be abstracted away because Rust will complain with the message that self.code was mutabley borrowed more than once.
     fn is_finished(&self) -> bool {
-        self.code.is_finished() || self.call_stack.len() == 0
+        self.code.is_finished() || self.call_stack.is_empty()
     }
 }
