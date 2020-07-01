@@ -2,8 +2,15 @@
 //! In the future, it should maintain labels, constants, and other information about the code.
 //! This Code struct is called internally and should not be called from the outside.
 
-use crate::{errors::{error::Error, error_kind::ErrorKind}, tokens::{token_kind::TokenKind, token::Token}, values::values::Value};
-use std::{collections::{HashMap, VecDeque}, rc::Rc};
+use crate::{
+    errors::{error::Error, error_kind::ErrorKind},
+    tokens::{token::Token, token_kind::TokenKind},
+    values::value::Value,
+};
+use std::{
+    collections::{HashMap, VecDeque},
+    rc::Rc,
+};
 
 #[derive(Debug)]
 pub struct Code {
@@ -21,16 +28,16 @@ impl Code {
     pub fn new(tokens: VecDeque<Token>) -> Result<Code, Error> {
         let mut labels = HashMap::new();
         let mut values = VecDeque::new();
-        let mut iter = tokens.into_iter().enumerate();
-        while let Some((pos, token)) = iter.next() {
+        let iter = tokens.into_iter().enumerate();
+        for (pos, token) in iter {
             match &token.kind {
                 TokenKind::Label(name) => {
-                    if let Some(_) = labels.insert(name.to_owned(), pos) {
+                    if labels.insert(name.to_owned(), pos).is_some() {
                         return Err(Error::new(ErrorKind::DuplicateLabel, token.pos));
                     } else {
                         values.push_back(Rc::new(token.into()));
                     }
-                },
+                }
                 _ => values.push_back(Rc::new(token.into())),
             };
         }
@@ -46,14 +53,6 @@ impl Code {
         }
     }
 
-    /// This function gets the next value from the values vector.
-    pub fn next(&mut self) -> Option<Rc<Value>> {
-        self.value_pointer += 1;
-
-        // Cloning the object is cheap because it is reference counted.
-        self.values.get(self.value_pointer - 1).cloned()
-    }
-
     /// This function updates the value_pointer to have the value of jump_location
     /// if and only if jump_location is a valid index. Note that counting is 0-based.
     ///
@@ -66,7 +65,10 @@ impl Code {
             self.value_pointer = jump_location as usize;
             None
         } else {
-            Some(Error::new(ErrorKind::OutOfBounds(0, self.values.len()), pos))
+            Some(Error::new(
+                ErrorKind::OutOfBounds(0, self.values.len()),
+                pos,
+            ))
         }
     }
 
@@ -77,18 +79,32 @@ impl Code {
     /// `jump_location` - The new value of value_pointer.
     /// `pos` - The position where this was needed.
     pub fn relative_jump(&mut self, jump_location: i64, pos: usize) -> Option<Error> {
-        let lower_bound = -1 * (self.value_pointer as i64);
+        let lower_bound = -(self.value_pointer as i64);
         let upper_bound = self.values.len() as i64;
         if jump_location >= lower_bound && jump_location < upper_bound {
             self.value_pointer += jump_location as usize;
             None
         } else {
-            Some(Error::new(ErrorKind::OutOfBounds(lower_bound as usize, self.values.len()), pos))
+            Some(Error::new(
+                ErrorKind::OutOfBounds(lower_bound as usize, self.values.len()),
+                pos,
+            ))
         }
     }
 
     /// This function returns true if there are no more values in the Code struct.
     pub fn is_finished(&self) -> bool {
         self.value_pointer >= self.values.len()
+    }
+}
+
+impl Iterator for Code {
+    type Item = Rc<Value>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.value_pointer += 1;
+
+        // Cloning the object is cheap because it is reference counted.
+        self.values.get(self.value_pointer - 1).cloned()
     }
 }
