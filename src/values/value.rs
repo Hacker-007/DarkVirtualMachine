@@ -3,7 +3,7 @@ use crate::{
     errors::{error::Error, error_kind::ErrorKind},
     tokens::{token::Token, token_kind::TokenKind},
 };
-use std::{fmt, rc::Rc};
+use std::fmt;
 
 /// The Value struct maintains both the position where this value is used and its kind.
 /// Maintaining the position is useful because it can be used to produce good error messages.
@@ -430,14 +430,13 @@ impl From<Token> for Value {
                 TokenKind::FloatLiteral(value) => ValueKind::Float(value),
                 TokenKind::BooleanLiteral(value) => ValueKind::Boolean(value),
                 TokenKind::StringLiteral(value) => ValueKind::String(value),
-                TokenKind::Identifier(name) => {
-                    ValueKind::Variable(name, Rc::new(Value::new(token.pos, ValueKind::Void)))
-                }
+                TokenKind::Identifier(name) => ValueKind::Identifier(name),
                 TokenKind::Label(name) => ValueKind::Label(name),
                 TokenKind::End => ValueKind::End,
 
                 TokenKind::Push => ValueKind::Push,
                 TokenKind::Pop => ValueKind::Pop,
+                TokenKind::Peek => ValueKind::Peek,
                 TokenKind::Add => ValueKind::Add,
                 TokenKind::Sub => ValueKind::Sub,
                 TokenKind::Mul => ValueKind::Mul,
@@ -454,6 +453,7 @@ impl From<Token> for Value {
                 TokenKind::JumpIfFalse => ValueKind::JumpIfFalse,
                 TokenKind::Print => ValueKind::Print,
                 TokenKind::PrintNewLine => ValueKind::PrintNewLine,
+                TokenKind::Set => ValueKind::Set,
             },
         }
     }

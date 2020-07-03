@@ -26,6 +26,7 @@ Currently, DarkVM supports the following types:
 The instructions that DarkVM currently supports are:
   - push
   - pop
+  - peek
   - add
   - sub
   - mul
@@ -40,6 +41,7 @@ The instructions that DarkVM currently supports are:
   - rjmp
   - jmpt
   - jmpf
+  - set
 
 ***
 
@@ -87,6 +89,31 @@ pop
 After this instruction, the stack will look like this:
 ```
 []
+```
+
+The value returned will be the int 1.
+
+**The Peek Instruction**
+
+The Peek instruction takes zero parameters.
+
+Example:
+
+```
+peek
+```
+
+> The peek instruction returns the top value from the stack. It does not remove it from the stack.
+
+Example:
+```
+push 1
+peek
+```
+
+After this instruction, the stack will look like this:
+```
+[1]
 ```
 
 The value returned will be the int 1.
@@ -491,6 +518,30 @@ After this instruction, the stack will look like this:
 ```
 
 No value is returned from the print instruction.
+
+**The Set Instruction**
+
+The Set Instruction takes two parameters.
+
+Example:
+```
+set message "Hello, World!"
+```
+
+> The set instruction defines a variable with the name of the first parameter, in this case, message. The value of this variable is the second parameter.
+
+Example:
+```
+set message "Hello, World!"
+printn message
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+No value is returned from the set instruction.
 
 **Comments In DarkVM**
 

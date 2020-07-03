@@ -15,6 +15,7 @@ pub enum TokenKind {
 
     Push,
     Pop,
+    Peek,
     Add,
     Sub,
     Mul,
@@ -31,6 +32,7 @@ pub enum TokenKind {
     JumpIfFalse,
     Print,
     PrintNewLine,
+    Set,
 }
 
 impl TokenKind {
@@ -43,6 +45,7 @@ impl TokenKind {
         match name.to_ascii_lowercase().as_str() {
             "push" => Some(TokenKind::Push),
             "pop" => Some(TokenKind::Pop),
+            "peek" => Some(TokenKind::Peek),
             "add" => Some(TokenKind::Add),
             "sub" => Some(TokenKind::Sub),
             "mul" => Some(TokenKind::Mul),
@@ -59,6 +62,7 @@ impl TokenKind {
             "jmpf" => Some(TokenKind::JumpIfFalse),
             "print" => Some(TokenKind::Print),
             "printn" => Some(TokenKind::PrintNewLine),
+            "set" => Some(TokenKind::Set),
 
             _ => None,
         }

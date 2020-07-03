@@ -25,23 +25,22 @@ use crate::{
 use std::{collections::VecDeque, rc::Rc};
 
 #[derive(Debug)]
-pub struct VM {
+pub struct VM<'a> {
     code: Code,
     pub operand_stack: Stack<Rc<Value>>,
-    call_stack: Stack<Frame>,
+    call_stack: Stack<Frame<'a>>,
 }
 
-impl VM {
+impl<'a> VM<'a> {
     /// Constructs a new VM with the specified tokens.
     /// The tokens are usually generated through the lexer.
     /// Internally, the tokens are converted to different values by the code object.
     ///
     /// # Arguments
     /// `tokens` - The tokens produced by the lexer.
-    pub fn new(tokens: VecDeque<Token>) -> Result<VM, Error> {
+    pub fn new(tokens: VecDeque<Token>) -> Result<VM<'a>, Error> {
         let code = Code::new(tokens)?;
-
-        let main_frame = Frame::new(0, "main");
+        let main_frame = Frame::new(0, "main", None);
         let mut call_stack = Stack::new();
         call_stack.push(main_frame);
         Ok(VM {
@@ -83,7 +82,12 @@ impl VM {
             | ValueKind::String(_) => Ok(Some(value)),
 
             // Cloning here is cheap because val is reference counted, so only a counter is incremented.
-            ValueKind::Variable(_, val) => Ok(Some(val.clone())),
+            ValueKind::Identifier(name) => self
+                .call_stack
+                .peek()
+                .unwrap()
+                .find(name, value.pos)
+                .map(Some),
             ValueKind::Label(_) => {
                 let mut found_end = false;
                 while let Some(value) = self.next() {
@@ -113,6 +117,10 @@ impl VM {
 
             ValueKind::Push => self.push(value.pos),
             ValueKind::Pop => self.pop(value.pos).map(|(_, value)| value),
+            ValueKind::Peek => self.operand_stack.peek().map_or(
+                Ok(Some(Rc::new(Value::new(value.pos, ValueKind::Void)))),
+                |peeked_value| Ok(Some(peeked_value.clone())),
+            ),
             ValueKind::Add => self.add(value.pos),
             ValueKind::Sub => self.sub(value.pos),
             ValueKind::Mul => self.mul(value.pos),
@@ -129,6 +137,7 @@ impl VM {
             ValueKind::JumpIfFalse => self.jmpf(value.pos),
             ValueKind::Print => self.print(value.pos),
             ValueKind::PrintNewLine => self.printn(value.pos),
+            ValueKind::Set => self.set(value.pos),
         }
     }
 
@@ -613,6 +622,39 @@ impl VM {
         }
     }
 
+    /// Sets the identifier passed in to the value passed in.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn set(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.get_arg_unevaluated(2, pos)?;
+        let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
+
+        match &arg1.kind {
+            ValueKind::Identifier(name) => {
+                if let Some(value) = arg2 {
+                    self.call_stack.peek_mut().unwrap().define(name, value);
+                    Ok(None)
+                } else {
+                    Err(Error::new(
+                        ErrorKind::ValueMismatch(
+                            ValueKind::Any.get_value_name(),
+                            ValueKind::Void.get_value_name(),
+                        ),
+                        arg_pos_2,
+                    ))
+                }
+            }
+            kind => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Identifier("".to_owned()).get_value_name(),
+                    kind.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+        }
+    }
+
     /// Gets the next argument.
     /// This funtion is usually called by instructions.
     ///
@@ -628,6 +670,23 @@ impl VM {
             .next()
             .ok_or_else(|| Error::new(ErrorKind::ExpectedArgs(expected_args), pos))?;
         Ok((arg.pos, self.evaluate_value(arg)?))
+    }
+
+    /// Gets the next argument.
+    /// This funtion is usually called by instructions.
+    ///
+    /// # Arguments
+    /// * `expected_args` - The number of arguments remaining for the instruction.
+    /// * `pos` - THe position where the instrution was called.
+    fn get_arg_unevaluated(
+        &mut self,
+        expected_args: usize,
+        pos: usize,
+    ) -> Result<(usize, Rc<Value>), Error> {
+        let arg = self
+            .next()
+            .ok_or_else(|| Error::new(ErrorKind::ExpectedArgs(expected_args), pos))?;
+        Ok((arg.pos, arg))
     }
 
     /// Gets the next value.
