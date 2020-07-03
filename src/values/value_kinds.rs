@@ -1,8 +1,7 @@
 //! The ValueKind enum maintains the various values in the language.
 //! All of the supported values are in this enum. This makes it easy to expand in the future.
 
-use super::value::Value;
-use std::{fmt, rc::Rc};
+use std::fmt;
 
 #[derive(PartialEq)]
 pub enum ValueKind {
@@ -12,12 +11,13 @@ pub enum ValueKind {
     Float(f64),
     Boolean(bool),
     String(String),
-    Variable(String, Rc<Value>),
+    Identifier(String),
     Label(String),
     End,
 
     Push,
     Pop,
+    Peek,
     Add,
     Sub,
     Mul,
@@ -34,6 +34,7 @@ pub enum ValueKind {
     JumpIfFalse,
     Print,
     PrintNewLine,
+    Set,
 }
 
 impl ValueKind {
@@ -48,11 +49,12 @@ impl ValueKind {
             ValueKind::Float(_) => "Float",
             ValueKind::Boolean(_) => "Boolean",
             ValueKind::String(_) => "String",
-            ValueKind::Variable(_, value) => return value.kind.get_value_name(),
+            ValueKind::Identifier(_) => "Identifier",
             ValueKind::Label(_) => "Label",
             ValueKind::End => "End",
             ValueKind::Push => "Instruction Push",
             ValueKind::Pop => "Instruction Pop",
+            ValueKind::Peek => "Instruction Peek",
             ValueKind::Add => "Instruction Add",
             ValueKind::Sub => "Instruction Sub",
             ValueKind::Mul => "Instruction Mul",
@@ -69,6 +71,7 @@ impl ValueKind {
             ValueKind::JumpIfFalse => "Instruction JumpIfFalse",
             ValueKind::Print => "Instruction Print",
             ValueKind::PrintNewLine => "Instruction PrintNewLine",
+            ValueKind::Set => "Instruction Set",
         }
         .to_owned()
     }
@@ -83,11 +86,12 @@ impl fmt::Debug for ValueKind {
             ValueKind::Float(value) => write!(f, "{}", value),
             ValueKind::Boolean(value) => write!(f, "{}", value),
             ValueKind::String(value) => write!(f, "{}", value),
-            ValueKind::Variable(name, _) => write!(f, "Variable '{}'", name),
+            ValueKind::Identifier(name) => write!(f, "Identifier '{}'", name),
             ValueKind::Label(name) => write!(f, "Label '{}'", name),
             ValueKind::End => write!(f, "End"),
             ValueKind::Push => write!(f, "<instruction push>"),
             ValueKind::Pop => write!(f, "<instruction pop>"),
+            ValueKind::Peek => write!(f, "<instruction peek>"),
             ValueKind::Add => write!(f, "<instruction add>"),
             ValueKind::Sub => write!(f, "<instruction sub>"),
             ValueKind::Mul => write!(f, "<instruction mul>"),
@@ -104,6 +108,7 @@ impl fmt::Debug for ValueKind {
             ValueKind::JumpIfFalse => write!(f, "<instruction jmpf>"),
             ValueKind::Print => write!(f, "<instruction print>"),
             ValueKind::PrintNewLine => write!(f, "<instruction printn>"),
+            ValueKind::Set => write!(f, "<instruction set>"),
         }
     }
 }

@@ -18,7 +18,6 @@ pub enum ErrorKind {
     NoEndOfLabel,
     DivisionByZero,
     OutOfBounds(usize, usize),
-    DuplicateVariable,
     UndefinedVariable,
 }
 
@@ -67,7 +66,6 @@ impl Into<String> for ErrorKind {
                     beginning, end
                 )
             }
-            ErrorKind::DuplicateVariable => "Another Variable With This Name Was Defined Already.",
             ErrorKind::UndefinedVariable => "Tried To Use A Variable That Has Not Been Defined.",
         }
         .to_owned()

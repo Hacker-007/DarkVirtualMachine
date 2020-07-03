@@ -42,6 +42,16 @@ impl<T: Debug + PartialEq> Stack<T> {
         }
     }
 
+    /// This function returns a reference to the top value on the stack, without consuming it.
+    /// If the stack is empty, None is returned.
+    pub fn peek_mut(&mut self) -> Option<&mut T> {
+        if self.0.is_empty() {
+            None
+        } else {
+            self.0.first_mut()
+        }
+    }
+
     /// This function returns true if there are no elements in the stack.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
