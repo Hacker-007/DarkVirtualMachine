@@ -19,6 +19,7 @@ pub enum ErrorKind {
     DivisionByZero,
     OutOfBounds(usize, usize),
     UndefinedVariable,
+    UndefinedLabel,
 }
 
 /// Converts the ErrorKind into a String.
@@ -67,6 +68,7 @@ impl Into<String> for ErrorKind {
                 )
             }
             ErrorKind::UndefinedVariable => "Tried To Use A Variable That Has Not Been Defined.",
+            ErrorKind::UndefinedLabel => "Tried To Use A Label That Has Not Been Defined.",
         }
         .to_owned()
     }

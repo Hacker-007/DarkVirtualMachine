@@ -5,20 +5,20 @@ use crate::{
     errors::{error::Error, error_kind::ErrorKind},
     values::value::Value,
 };
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, rc::Rc, cell::RefCell};
 
 #[derive(Debug, PartialEq)]
-pub struct Store<'a> {
-    parent_store: Option<&'a Store<'a>>,
+pub struct Store {
+    parent_store: Option<Rc<RefCell<Store>>>,
     store: HashMap<String, Rc<Value>>,
 }
 
-impl<'a> Store<'a> {
+impl Store {
     /// Creates a new Store.
     ///
     /// # Arguments
     /// `parent_store` - The parent of this store. This maintains all of the variables defined in a higher scope.
-    pub fn new(parent_store: Option<&'a Store<'a>>) -> Store<'a> {
+    pub fn new(parent_store: Option<Rc<RefCell<Store>>>) -> Store {
         Store {
             parent_store,
             store: HashMap::new(),
@@ -44,8 +44,8 @@ impl<'a> Store<'a> {
         let var = self.store.get(name);
         if let Some(variable) = var {
             Ok(variable.clone())
-        } else if let Some(parent) = self.parent_store {
-            parent.get(name, pos)
+        } else if let Some(parent) = &self.parent_store {
+            parent.borrow().get(name, pos)
         } else {
             Err(Error::new(ErrorKind::UndefinedVariable, pos))
         }

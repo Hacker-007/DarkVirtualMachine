@@ -121,20 +121,19 @@ impl Lexer {
         }
 
         // This probably could be written using a match statement.
-        if word.eq_ignore_ascii_case(&"void") {
-            Token::new(TokenKind::Void, initial_point)
-        } else if word.eq_ignore_ascii_case(&"any") {
-            Token::new(TokenKind::Any, initial_point)
-        } else if word.eq_ignore_ascii_case(&"true") {
-            Token::new(TokenKind::BooleanLiteral(true), initial_point)
-        } else if word.eq_ignore_ascii_case(&"false") {
-            Token::new(TokenKind::BooleanLiteral(false), initial_point)
-        } else if word.eq_ignore_ascii_case(&"end") {
-            Token::new(TokenKind::End, initial_point)
-        } else if let Some(instruction) = TokenKind::is_instruction(&word) {
-            Token::new(instruction, initial_point)
-        } else {
-            Token::new(TokenKind::Identifier(word), initial_point)
+        match word.to_ascii_lowercase().as_str() {
+            "void" => Token::new(TokenKind::Void, initial_point),
+            "any" => Token::new(TokenKind::Any, initial_point),
+            "true" => Token::new(TokenKind::BooleanLiteral(true), initial_point),
+            "false" => Token::new(TokenKind::BooleanLiteral(false), initial_point),
+            "end" => Token::new(TokenKind::End, initial_point),
+            instr @ _ => {
+                if let Some(instruction) = TokenKind::is_instruction(instr) {
+                    Token::new(instruction, initial_point)
+                } else {
+                    Token::new(TokenKind::Identifier(word), initial_point)
+                }
+            }
         }
     }
 

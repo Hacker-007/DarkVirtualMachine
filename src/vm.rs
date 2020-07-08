@@ -25,20 +25,20 @@ use crate::{
 use std::{collections::VecDeque, rc::Rc};
 
 #[derive(Debug)]
-pub struct VM<'a> {
+pub struct VM {
     code: Code,
     pub operand_stack: Stack<Rc<Value>>,
-    call_stack: Stack<Frame<'a>>,
+    call_stack: Stack<Frame>,
 }
 
-impl<'a> VM<'a> {
+impl VM {
     /// Constructs a new VM with the specified tokens.
     /// The tokens are usually generated through the lexer.
     /// Internally, the tokens are converted to different values by the code object.
     ///
     /// # Arguments
     /// `tokens` - The tokens produced by the lexer.
-    pub fn new(tokens: VecDeque<Token>) -> Result<VM<'a>, Error> {
+    pub fn new(tokens: VecDeque<Token>) -> Result<VM, Error> {
         let code = Code::new(tokens)?;
         let main_frame = Frame::new(0, "main", None);
         let mut call_stack = Stack::new();
@@ -138,6 +138,7 @@ impl<'a> VM<'a> {
             ValueKind::Print => self.print(value.pos),
             ValueKind::PrintNewLine => self.printn(value.pos),
             ValueKind::Set => self.set(value.pos),
+            ValueKind::Call => self.call(value.pos),
         }
     }
 
@@ -655,12 +656,38 @@ impl<'a> VM<'a> {
         }
     }
 
+    /// Calls the label passed in. In other words, it changes the instruction pointer.
+    /// In the future, this would be changed to include the number of parameters on the stack.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn call(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.get_arg_unevaluated(1, pos)?;
+        match &arg1.kind {
+            ValueKind::Identifier(label_name) => {
+                let caller_pos = self.code.get_current_pos();
+                self.code.set_label_location(label_name, arg_pos_1)?;
+                let new_frame = Frame::new(caller_pos, label_name, self.call_stack.peek().map(|frame| &frame.current_store));
+                self.call_stack.push(new_frame);
+
+                Ok(None)
+            },
+            kind => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Label("".to_owned()).get_value_name(),
+                    kind.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+        }
+    }
+
     /// Gets the next argument.
     /// This funtion is usually called by instructions.
     ///
     /// # Arguments
     /// * `expected_args` - The number of arguments remaining for the instruction.
-    /// * `pos` - THe position where the instrution was called.
+    /// * `pos` - The position where the instrution was called.
     fn get_arg(
         &mut self,
         expected_args: usize,
@@ -677,7 +704,7 @@ impl<'a> VM<'a> {
     ///
     /// # Arguments
     /// * `expected_args` - The number of arguments remaining for the instruction.
-    /// * `pos` - THe position where the instrution was called.
+    /// * `pos` - The position where the instrution was called.
     fn get_arg_unevaluated(
         &mut self,
         expected_args: usize,

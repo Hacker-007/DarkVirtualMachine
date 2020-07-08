@@ -92,6 +92,26 @@ impl Code {
         }
     }
 
+    /// Sets the value pointer to the location of the label passed in. If the label name does not exist, an error is reported.
+    /// Additionally, it returns the position of the label.
+    ///
+    /// # Arguments
+    /// `label_name` - The name of the label.
+    /// `pos` - The position where this was needed.
+    pub fn set_label_location(&mut self, label_name: &String, pos: usize) -> Result<usize, Error> {
+        if let Some(label_pos) = self.labels.get(label_name) {
+            self.value_pointer = *label_pos + 1;
+            Ok(*label_pos)
+        } else {
+            Err(Error::new(ErrorKind::UndefinedLabel, pos))
+        }
+    }
+
+    /// This function gets the current value of value pointer.
+    pub fn get_current_pos(&self) -> usize {
+        self.value_pointer
+    }
+
     /// This function returns true if there are no more values in the Code struct.
     pub fn is_finished(&self) -> bool {
         self.value_pointer >= self.values.len()
