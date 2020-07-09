@@ -574,6 +574,21 @@ After this instruction, the stack will look like this:
 
 No value is returned from the call instruction.
 
+**Labels In DarkVM**
+
+In the DarkVM, labels are what provide local scopes. They can be thought up as methods or blocks depending on the context.
+Here is how you define a label:
+```
+@label_name
+end
+```
+
+> Here, you can see that labels start with an @ and are then followed by the name of the label. Finally, they have the end keyword. Any amount of code can go in between the label name and the end keyword.
+
+Labels have access to the parent scope and local scope. What does that mean?
+Well, if a label is defined inside another label, then the child label has access to all of the variables inside of the parent label.
+Otherwise, it just has access to its own scope. Though the child label can access the parent label, the parent can not access the child.
+
 **Comments In DarkVM**
 
 DarkVM supports both single line and multiline comments.
