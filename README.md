@@ -3,7 +3,7 @@
 A new VM that focuses on providing current features without comprimising
 on speed and simplicity.
 
-> This project is also a way for me to learn more about VM's and compilers.
+> This project is also a way for me to learn more about VMs and compilers.
 
 **Details About DarkVM**
 

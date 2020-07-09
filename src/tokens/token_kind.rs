@@ -33,6 +33,7 @@ pub enum TokenKind {
     Print,
     PrintNewLine,
     Set,
+    Call,
 }
 
 impl TokenKind {
@@ -63,6 +64,7 @@ impl TokenKind {
             "print" => Some(TokenKind::Print),
             "printn" => Some(TokenKind::PrintNewLine),
             "set" => Some(TokenKind::Set),
+            "call" => Some(TokenKind::Call),
 
             _ => None,
         }

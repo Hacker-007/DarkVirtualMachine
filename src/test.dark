@@ -1,27 +1,12 @@
 @main
-    -- Define a variable called a
     set a 1
+    printn "I Am Inside Of main."
+    printn a
 
-    -- Increment a by 1
-    push 1
-    push a
-    push add
-
-    -- Print out the value of incrementing a by 1
-    printn peek
-
-    -- Print the message 'The Value Of a Is: 1'
-    push a
-    push 'The Value Of a Is: '
-    push add
-    printn pop
-
-    -- Set the value of a to be a + 1
-    set a pop
-
-    -- Print the message 'The Value Of a Is: 1'
-    push a
-    push 'The Value Of a Is: '
-    push add
-    printn pop
+    call test_variable_access
+    @test_variable_access
+        printn "I Am Inside Of test_variable_access."
+        printn "This Should Not Fail."
+        printn a
+    end
 end

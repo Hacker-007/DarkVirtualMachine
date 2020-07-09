@@ -35,6 +35,7 @@ pub enum ValueKind {
     Print,
     PrintNewLine,
     Set,
+    Call,
 }
 
 impl ValueKind {
@@ -72,6 +73,7 @@ impl ValueKind {
             ValueKind::Print => "Instruction Print",
             ValueKind::PrintNewLine => "Instruction PrintNewLine",
             ValueKind::Set => "Instruction Set",
+            ValueKind::Call => "Instruction Call",
         }
         .to_owned()
     }
@@ -109,6 +111,7 @@ impl fmt::Debug for ValueKind {
             ValueKind::Print => write!(f, "<instruction print>"),
             ValueKind::PrintNewLine => write!(f, "<instruction printn>"),
             ValueKind::Set => write!(f, "<instruction set>"),
+            ValueKind::Call => write!(f, "<instruction call>"),
         }
     }
 }

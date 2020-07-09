@@ -454,6 +454,7 @@ impl From<Token> for Value {
                 TokenKind::Print => ValueKind::Print,
                 TokenKind::PrintNewLine => ValueKind::PrintNewLine,
                 TokenKind::Set => ValueKind::Set,
+                TokenKind::Call => ValueKind::Call,
             },
         }
     }

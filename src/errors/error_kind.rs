@@ -10,6 +10,7 @@ pub enum ErrorKind {
 
     DuplicateLabel,
     NoMainLabel,
+    EndWithoutLabel,
 
     EmptyStack,
     ExpectedArgs(usize),
@@ -19,6 +20,7 @@ pub enum ErrorKind {
     DivisionByZero,
     OutOfBounds(usize, usize),
     UndefinedVariable,
+    UndefinedLabel,
 }
 
 /// Converts the ErrorKind into a String.
@@ -33,6 +35,7 @@ impl Into<String> for ErrorKind {
 
             ErrorKind::DuplicateLabel => "Another Label With This Name Was Defined Already.",
             ErrorKind::NoMainLabel => "A Main Label Could Not Be Found.",
+            ErrorKind::EndWithoutLabel => "Found An End That Is Not Associated With A Label.",
 
             ErrorKind::EmptyStack => "Tried To Pop From An Empty Stack.",
             ErrorKind::ExpectedArgs(arg_amt) => {
@@ -67,6 +70,7 @@ impl Into<String> for ErrorKind {
                 )
             }
             ErrorKind::UndefinedVariable => "Tried To Use A Variable That Has Not Been Defined.",
+            ErrorKind::UndefinedLabel => "Tried To Use A Label That Has Not Been Defined.",
         }
         .to_owned()
     }
