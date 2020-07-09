@@ -42,6 +42,7 @@ The instructions that DarkVM currently supports are:
   - jmpt
   - jmpf
   - set
+  - call
 
 ***
 
@@ -542,6 +543,36 @@ After this instruction, the stack will look like this:
 ```
 
 No value is returned from the set instruction.
+
+**The Call Instruction**
+
+The Call Instruction takes one parameter.
+
+Example:
+```
+call greet
+```
+
+> The call instruction calls the label passed in. For more information on labels, visit the section dedicated to them.
+
+Example:
+```
+call greet
+
+@greet
+  printn "Hello, World!"
+end
+```
+
+> In the above example, the code within the greet label is run. So, "Hello, World!" is printed out to the screen.
+> After finishing the code in the label, the code resumes from the point after the function call.
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+No value is returned from the call instruction.
 
 **Comments In DarkVM**
 
