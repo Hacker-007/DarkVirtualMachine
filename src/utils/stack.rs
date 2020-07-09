@@ -38,7 +38,7 @@ impl<T: Debug + PartialEq> Stack<T> {
         if self.0.is_empty() {
             None
         } else {
-            self.0.first()
+            self.0.last()
         }
     }
 
@@ -48,7 +48,7 @@ impl<T: Debug + PartialEq> Stack<T> {
         if self.0.is_empty() {
             None
         } else {
-            self.0.first_mut()
+            self.0.last_mut()
         }
     }
 

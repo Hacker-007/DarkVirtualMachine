@@ -8,7 +8,7 @@ use std::{cell::RefCell, rc::Rc};
 #[derive(Debug, PartialEq)]
 pub struct Frame {
     caller_position: usize,
-    name: String,
+    pub name: String,
     pub current_store: Rc<RefCell<Store>>,
 }
 

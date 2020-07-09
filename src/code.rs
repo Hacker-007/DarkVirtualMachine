@@ -16,7 +16,7 @@ use std::{
 pub struct Code {
     value_pointer: usize,
     values: VecDeque<Rc<Value>>,
-    labels: HashMap<String, usize>,
+    labels: HashMap<String, (usize, usize)>,
 }
 
 impl Code {
@@ -29,20 +29,32 @@ impl Code {
         let mut labels = HashMap::new();
         let mut values = VecDeque::new();
         let iter = tokens.into_iter().enumerate();
+        let mut label_stack = vec![];
         for (pos, token) in iter {
             match &token.kind {
                 TokenKind::Label(name) => {
-                    if labels.insert(name.to_owned(), pos).is_some() {
-                        return Err(Error::new(ErrorKind::DuplicateLabel, token.pos));
-                    } else {
-                        values.push_back(Rc::new(token.into()));
+                    label_stack.push((pos, token.pos, name.to_owned()));
+                    values.push_back(Rc::new(token.into()));
+                },
+                TokenKind::End => {
+                    match label_stack.pop() {
+                        Some((last_start, last_pos, last_name)) => {
+                            if labels.insert(last_name, (last_start, pos)).is_some() {
+                                return Err(Error::new(ErrorKind::DuplicateLabel, last_pos));
+                            } else {
+                                values.push_back(Rc::new(token.into()));
+                            }
+                        },
+                        None => return Err(Error::new(ErrorKind::EndWithoutLabel, token.pos)),
                     }
-                }
+                },
                 _ => values.push_back(Rc::new(token.into())),
             };
         }
 
-        if let Some(&value_pointer) = labels.get(&"main".to_owned()) {
+        if let Some((_, last_pos, _)) = label_stack.pop() {
+            Err(Error::new(ErrorKind::NoEndOfLabel, last_pos))
+        } else if let Some(&(value_pointer, _)) = labels.get(&"main".to_owned()) {
             Ok(Code {
                 value_pointer: value_pointer + 1,
                 values,
@@ -98,13 +110,19 @@ impl Code {
     /// # Arguments
     /// `label_name` - The name of the label.
     /// `pos` - The position where this was needed.
-    pub fn set_label_location(&mut self, label_name: &String, pos: usize) -> Result<usize, Error> {
-        if let Some(label_pos) = self.labels.get(label_name) {
-            self.value_pointer = *label_pos + 1;
-            Ok(*label_pos)
+    pub fn set_label_location(&mut self, label_name: &String, pos: usize) -> Result<(usize, usize), Error> {
+        if let Some(&(label_pos_start, label_pos_end)) = self.labels.get(label_name) {
+            self.value_pointer = label_pos_start + 1;
+            Ok((label_pos_start, label_pos_end))
         } else {
             Err(Error::new(ErrorKind::UndefinedLabel, pos))
         }
+    }
+
+    /// This function gets the start and end locations of the given label.
+    /// This function returns None if the label does not exist.
+    pub fn get_label_start_end(&self, label_name: &String) -> Option<(usize, usize)> {
+        self.labels.get(label_name).copied()
     }
 
     /// This function gets the current value of value pointer.

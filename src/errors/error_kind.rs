@@ -10,6 +10,7 @@ pub enum ErrorKind {
 
     DuplicateLabel,
     NoMainLabel,
+    EndWithoutLabel,
 
     EmptyStack,
     ExpectedArgs(usize),
@@ -34,6 +35,7 @@ impl Into<String> for ErrorKind {
 
             ErrorKind::DuplicateLabel => "Another Label With This Name Was Defined Already.",
             ErrorKind::NoMainLabel => "A Main Label Could Not Be Found.",
+            ErrorKind::EndWithoutLabel => "Found An End That Is Not Associated With A Label.",
 
             ErrorKind::EmptyStack => "Tried To Pop From An Empty Stack.",
             ErrorKind::ExpectedArgs(arg_amt) => {

@@ -666,8 +666,16 @@ impl VM {
         match &arg1.kind {
             ValueKind::Identifier(label_name) => {
                 let caller_pos = self.code.get_current_pos();
-                self.code.set_label_location(label_name, arg_pos_1)?;
-                let new_frame = Frame::new(caller_pos, label_name, self.call_stack.peek().map(|frame| &frame.current_store));
+                let (start, end) = self.code.set_label_location(label_name, arg_pos_1)?;
+                let store = self.call_stack.peek().filter(|frame| {
+                    if let Some((cur_start, cur_end)) = self.code.get_label_start_end(&frame.name) {
+                        cur_start < start && end < cur_end
+                    } else {
+                        false
+                    }
+                }).map(|frame| &frame.current_store);
+
+                let new_frame = Frame::new(caller_pos, label_name, store);
                 self.call_stack.push(new_frame);
 
                 Ok(None)

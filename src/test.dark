@@ -4,9 +4,9 @@
     printn a
 
     call test_variable_access
-end
-
-@test_variable_access
-    printn "I Am Inside Of test_variable_access."
-    printn a
+    @test_variable_access
+        printn "I Am Inside Of test_variable_access."
+        printn "This Should Not Fail."
+        printn a
+    end
 end
