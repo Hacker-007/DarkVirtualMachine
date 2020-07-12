@@ -46,7 +46,7 @@ impl Lexer {
                 '0'..='9' | '-' => tokens.push_back(self.make_number(ch, &mut iter)?),
                 '\'' | '"' => tokens.push_back(self.make_string(ch, &mut iter)?),
                 '@' => tokens.push_back(self.make_label(&mut iter)?),
-                letter if ch.is_ascii_alphabetic() => {
+                letter if ch.is_ascii_alphabetic() || ch == '_' => {
                     tokens.push_back(self.make_word(letter, &mut iter))
                 }
                 _ => {
