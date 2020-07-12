@@ -337,33 +337,23 @@ impl Value {
     /// # Arguments
     /// `other` - The other value to compare.
     /// `pos` - The position where this operation was called.
-    pub fn equal(&self, other: &Value, pos: usize) -> Result<Value, Error> {
+    pub fn equal(&self, other: &Value, pos: usize) -> Value {
         match (&self.kind, &other.kind) {
             (ValueKind::Int(val1), ValueKind::Int(val2)) => {
-                Ok(Value::new(pos, ValueKind::Boolean(val1 == val2)))
+                Value::new(pos, ValueKind::Boolean(val1 == val2))
             }
-            (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(
+            (ValueKind::Float(val1), ValueKind::Float(val2)) => Value::new(
                 pos,
                 ValueKind::Boolean((val1 - val2).abs() < std::f64::EPSILON),
-            )),
+            ),
             (ValueKind::Boolean(val1), ValueKind::Boolean(val2)) => {
-                Ok(Value::new(pos, ValueKind::Boolean(val1 == val2)))
+                Value::new(pos, ValueKind::Boolean(val1 == val2))
             }
             (ValueKind::String(val1), ValueKind::String(val2)) => {
-                Ok(Value::new(pos, ValueKind::Boolean(val1 == val2)))
+                Value::new(pos, ValueKind::Boolean(val1 == val2))
             }
 
-            _ => Err(Error::new(
-                ErrorKind::UnsupportedOperation(
-                    "Eq".to_owned(),
-                    format!(
-                        "The Value '{}' And The Value '{}'.",
-                        self.kind.get_value_name(),
-                        other.kind.get_value_name()
-                    ),
-                ),
-                pos,
-            )),
+            _ => Value::new(pos, ValueKind::Boolean(false)),
         }
     }
 
@@ -373,33 +363,23 @@ impl Value {
     /// # Arguments
     /// `other` - The other value to compare.
     /// `pos` - The position where this operation was called.
-    pub fn not_equal(&self, other: &Value, pos: usize) -> Result<Value, Error> {
+    pub fn not_equal(&self, other: &Value, pos: usize) -> Value {
         match (&self.kind, &other.kind) {
             (ValueKind::Int(val1), ValueKind::Int(val2)) => {
-                Ok(Value::new(pos, ValueKind::Boolean(val1 != val2)))
+                Value::new(pos, ValueKind::Boolean(val1 != val2))
             }
-            (ValueKind::Float(val1), ValueKind::Float(val2)) => Ok(Value::new(
+            (ValueKind::Float(val1), ValueKind::Float(val2)) => Value::new(
                 pos,
                 ValueKind::Boolean((val1 - val2).abs() > std::f64::EPSILON),
-            )),
+            ),
             (ValueKind::Boolean(val1), ValueKind::Boolean(val2)) => {
-                Ok(Value::new(pos, ValueKind::Boolean(val1 != val2)))
+                Value::new(pos, ValueKind::Boolean(val1 != val2))
             }
             (ValueKind::String(val1), ValueKind::String(val2)) => {
-                Ok(Value::new(pos, ValueKind::Boolean(val1 != val2)))
+                Value::new(pos, ValueKind::Boolean(val1 != val2))
             }
 
-            _ => Err(Error::new(
-                ErrorKind::UnsupportedOperation(
-                    "Neq".to_owned(),
-                    format!(
-                        "The Value '{}' And The Value '{}'.",
-                        self.kind.get_value_name(),
-                        other.kind.get_value_name()
-                    ),
-                ),
-                pos,
-            )),
+            _ => Value::new(pos, ValueKind::Boolean(true)),
         }
     }
 

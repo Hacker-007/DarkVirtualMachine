@@ -424,9 +424,7 @@ impl VM {
         let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1
-                .equal(operand2.as_ref(), pos)
-                .map(|val| Some(Rc::new(val))),
+            (Some(operand1), Some(operand2)) => Ok(Some(Rc::new(operand1.equal(operand2.as_ref(), pos)))),
             (None, _) => Err(Error::new(
                 ErrorKind::ValueMismatch(
                     ValueKind::Any.get_value_name(),
@@ -453,9 +451,7 @@ impl VM {
         let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => operand1
-                .not_equal(operand2.as_ref(), pos)
-                .map(|val| Some(Rc::new(val))),
+            (Some(operand1), Some(operand2)) => Ok(Some(Rc::new(operand1.not_equal(operand2.as_ref(), pos)))),
             (None, _) => Err(Error::new(
                 ErrorKind::ValueMismatch(
                     ValueKind::Any.get_value_name(),
