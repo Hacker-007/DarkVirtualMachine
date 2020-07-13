@@ -1,12 +1,13 @@
 @main
-push 123
-set x pop
-push 'This Should Not Be Equal To 123'
-push x
-push eq pop pop
-jmpf 22
-@__0__
-push 'Wow, This Is Does Not Work.'
-end
-call __0__
+    push 123
+    set x pop
+    push 'This Should Not Be Equal To 123'
+    push x
+    push eq pop pop
+    jmpf 22
+    @__0__
+        push 'Wow, This Is Does Not Work.'
+    end
+
+    call __0__
 end

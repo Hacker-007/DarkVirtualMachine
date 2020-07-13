@@ -25,19 +25,21 @@ pub mod code;
 /// The VM module. This maintains most of the code for the behavior of different instructions and the behavior of the VM in general.
 pub mod vm;
 
+/// The CLI module, which contains all of the arguments that were passed in to the program.
+mod cli;
+
 use lexer::Lexer;
-use std::fs;
 use vm::VM;
+use cli::arguments::Arguments;
 
 fn main() {
-    // Fully reads the contents of the test.dark file.
-    // This will change to accept a parameter (the path to the file) from the user.
-    let contents = fs::read_to_string("src\\test.dark").unwrap();
-
-    // Run the program by derefencing the String into a &str.
-    match run(&contents) {
-        Err(error) => println!("{}", error),
-        Ok(vm) => println!("{}", vm),
+    match Arguments::new() {
+        Ok(args) => {
+            if let Err(error) = args.run(run) {
+                println!("{}", error)
+            }
+        },
+        Err(error) => println!("{}", error.prettify("")),
     }
 }
 
