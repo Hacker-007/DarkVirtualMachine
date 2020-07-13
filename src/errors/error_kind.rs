@@ -3,6 +3,8 @@
 //! This also increases readibility within the code, because the ErrorKind's are more descriptive.
 
 pub enum ErrorKind {
+    UnrecognizedArgument(String),
+
     UnknownCharacter,
     InvalidNumberFormat,
     InvalidLabelName,
@@ -28,6 +30,10 @@ pub enum ErrorKind {
 impl Into<String> for ErrorKind {
     fn into(self) -> String {
         match self {
+            ErrorKind::UnrecognizedArgument(arg) => {
+                return format!("The Argument '{}' Is Not A Valid Argument.", arg)
+            }
+
             ErrorKind::UnknownCharacter => "Unknown Character Found Here.",
             ErrorKind::InvalidNumberFormat => "Invalid Number Format.",
             ErrorKind::InvalidLabelName => "Invalid Label Name.",
