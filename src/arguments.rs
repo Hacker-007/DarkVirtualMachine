@@ -1,5 +1,5 @@
-use crate::errors::{error::Error, error_kind::ErrorKind};
 use std::env;
+use dark_vm::errors::{error_kind::ErrorKind, error::Error};
 
 pub struct Arguments {
     path: Option<String>,
