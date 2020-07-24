@@ -40,7 +40,7 @@ fn main() {
 
 /// Runs the VM, and produces either an error, or the final state of the VM after the operations.
 /// The errors produced can be found in the utils::error::ErrorKind enum.
-fn run(contents: &str) -> Result<String, String> {
+pub fn run(contents: &str) -> Result<String, String> {
     let tokens = Lexer::default()
         .lex(contents)
         .map_err(|error| error.prettify(contents))?;
