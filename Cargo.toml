@@ -1,5 +1,10 @@
 [package]
-name = "dark-v2"
+name = "dark-vm"
 version = "0.1.0"
 authors = ["Revanth Pothukuchi <revanthpothukuchi123@gmail.com>"]
 edition = "2018"
+description = "A new VM called the DarkVM, which focuses on speed and simplicity."
+readme = "README.md"
+repository = "https://github.com/Hacker-007/DarkVirtualMachine"
+license = "MIT"
+keywords = ["VM", "interpreter", "compiler"]

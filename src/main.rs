@@ -30,16 +30,11 @@ mod cli;
 
 use lexer::Lexer;
 use vm::VM;
-use cli::arguments::Arguments;
+use cli::runner;
 
 fn main() {
-    match Arguments::new() {
-        Ok(args) => {
-            if let Err(error) = args.run(run) {
-                println!("{}", error)
-            }
-        },
-        Err(error) => println!("{}", error.prettify("")),
+    if let Err(error) = runner(run) {
+        println!("{}", error)
     }
 }
 
