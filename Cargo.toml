@@ -1,6 +1,6 @@
 [package]
 name = "dark_vm"
-version = "0.3.0"
+version = "0.1.0"
 authors = ["Revanth Pothukuchi <revanthpothukuchi123@gmail.com>"]
 edition = "2018"
 description = "A new VM called the DarkVM, which focuses on speed and simplicity."
