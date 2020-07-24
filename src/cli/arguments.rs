@@ -1,5 +1,5 @@
 use crate::errors::{error::Error, error_kind::ErrorKind};
-use std::{env, fs, time::Instant};
+use std::env;
 
 pub struct Arguments {
     path: Option<String>,
@@ -28,35 +28,15 @@ impl Arguments {
         Ok(arguments)
     }
 
-    pub fn run<F: Fn(&str) -> Result<String, String>>(&self, f: F) -> Result<(), String> {
-        if self.path.is_none() {
-            generate_error("Expected The Path To The Dark File.")
-        } else if self
-            .path
-            .as_ref()
-            .filter(|path| path.ends_with(".dark"))
-            .is_some()
-        {
-            let contents = fs::read_to_string(self.path.as_ref().unwrap())
-                .map_err(|_| "An Error Occurred.\nThe Path Provided Is Not Valid.".to_owned())?;
-            let start = Instant::now();
-            match f(&contents) {
-                Ok(vm) if self.show_machine => println!("{}", vm),
-                Ok(_) => {},
-                Err(error) => return Err(error),
-            }
-            
-            if self.show_time {
-                println!("Time Taken: {:#?}", start.elapsed())
-            }
-
-            Ok(())
-        } else {
-            generate_error("Expected The File Passed In To Be An Dark File.")
-        }
+    pub fn get_path(&self) -> Option<&String> {
+        self.path.as_ref()
     }
-}
 
-fn generate_error(error_message: &str) -> Result<(), String> {
-    Err(format!("An Error Occurred.\n{}", error_message))
+    pub fn show_machine(&self) -> bool {
+        self.show_machine
+    }
+
+    pub fn show_time(&self) -> bool {
+        self.show_time
+    }
 }
