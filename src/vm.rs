@@ -56,6 +56,11 @@ impl VM {
     /// `tokens` - The new tokens to use.
     pub fn with_tokens(&mut self, tokens: VecDeque<Token>) -> Result<(), Error> {
         self.code = Code::new(tokens)?;
+        self.call_stack.0.clear();
+        let main_frame = Frame::new(0, "main", None);
+        let mut call_stack = Stack::new();
+        call_stack.push(main_frame);
+        self.call_stack = call_stack;
         Ok(())
     }
 
