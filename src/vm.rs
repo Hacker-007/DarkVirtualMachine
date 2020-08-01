@@ -50,6 +50,15 @@ impl VM {
         })
     }
 
+    /// Updates the VM to use the supplied tokens while maintaining the operand stack.
+    ///
+    /// # Arguments
+    /// `tokens` - The new tokens to use.
+    pub fn with_tokens(&mut self, tokens: VecDeque<Token>) -> Result<(), Error> {
+        self.code = Code::new(tokens)?;
+        Ok(())
+    }
+
     /// Runs the VM until the end of the code.
     /// This function may return an optionally value, representing the value of the last expression.
     /// It may also prematurely return an error. This may be updated to return a vector of errors.
