@@ -115,12 +115,12 @@ impl Code {
     /// `pos` - The position where this was needed.
     pub fn jump(&mut self, jump_location: i64, pos: usize) -> Option<Error> {
         let upper_bound = self.values.len() as i64;
-        if jump_location >= 0 && jump_location < upper_bound {
+        if jump_location >= 0 && jump_location <= upper_bound {
             self.value_pointer = jump_location as usize;
             None
         } else {
             Some(Error::new(
-                ErrorKind::OutOfBounds(0, self.values.len()),
+                ErrorKind::OutOfBounds(0, self.values.len() + 1),
                 pos,
             ))
         }
@@ -135,7 +135,7 @@ impl Code {
     pub fn relative_jump(&mut self, jump_location: i64, pos: usize) -> Option<Error> {
         let lower_bound = -(self.value_pointer as i64);
         let upper_bound = self.values.len() as i64;
-        if jump_location >= lower_bound && jump_location < upper_bound {
+        if jump_location >= lower_bound && jump_location <= upper_bound {
             self.value_pointer += jump_location as usize;
             None
         } else {

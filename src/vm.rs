@@ -96,6 +96,9 @@ impl VM {
 
     /// Evaluates the next value.
     /// This means every value is an expression in some sense.
+    ///
+    /// # Arguments
+    /// `value` - The value to evaluate.
     fn evaluate_value(&mut self, value: Rc<Value>) -> Result<Option<Rc<Value>>, Error> {
         match &value.kind {
             ValueKind::Void => Ok(None),
@@ -172,7 +175,7 @@ impl VM {
     /// This ensures that instructions can be followed by more instructions as arguments.
     ///
     /// # Arguments
-    /// * `pos` - The position where the instruction was called.
+    /// `pos` - The position where the instruction was called.
     fn push(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
         // Get the next argument. The two parameters passed are useful in the case of errors.
         let (pos, arg) = self.get_arg(1, pos)?;
@@ -197,7 +200,7 @@ impl VM {
     /// Pops the top value from the stack.
     ///
     /// # Arguments
-    /// * `pos` - The position where the instruction was called.
+    /// `pos` - The position where the instruction was called.
     fn pop(&mut self, pos: usize) -> Result<(usize, Option<Rc<Value>>), Error> {
         // Pop the value and if there are no errors, map it to an option with the value.
         // stack.pop takes the position where the instruction was used in the case that the stack was empty.
@@ -208,7 +211,7 @@ impl VM {
     /// This internally calls both the pop instruction and the add method on the Value struct.
     ///
     /// # Arguments
-    /// * `pos` - The position where the instruction was called.
+    /// `pos` - The position where the instruction was called.
     fn add(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
         let (arg_pos_1, arg1) = self.pop(pos)?;
         let (arg_pos_2, arg2) = self.pop(pos)?;
@@ -238,7 +241,7 @@ impl VM {
     /// This internally calls both the pop instruction and the sub method on the Value struct.
     ///
     /// # Arguments
-    /// * `pos` - The position where the instruction was called.
+    /// `pos` - The position where the instruction was called.
     fn sub(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
         let (arg_pos_1, arg1) = self.pop(pos)?;
         let (arg_pos_2, arg2) = self.pop(pos)?;
@@ -268,7 +271,7 @@ impl VM {
     /// This internally calls both the pop instruction and the mul method on the Value struct.
     ///
     /// # Arguments
-    /// * `pos` - The position where the instruction was called.
+    /// `pos` - The position where the instruction was called.
     fn mul(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
         let (arg_pos_1, arg1) = self.pop(pos)?;
         let (arg_pos_2, arg2) = self.pop(pos)?;
@@ -298,7 +301,7 @@ impl VM {
     /// This internally calls both the pop instruction and the div method on the Value struct.
     ///
     /// # Arguments
-    /// * `pos` - The position where the instruction was called.
+    /// `pos` - The position where the instruction was called.
     fn div(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
         let (arg_pos_1, arg1) = self.pop(pos)?;
         let (arg_pos_2, arg2) = self.pop(pos)?;
@@ -497,7 +500,7 @@ impl VM {
     /// Changes the instruction pointer in the Code struct to the argument passed in.
     /// However, there are restrictions on the argument:
     /// - First, the argument must be an int.
-    /// - Second, the argument must fit in the range 0 and values.len() exclusive.
+    /// - Second, the argument must fit in the range 0 and values.len() inclusive.
     /// If either of these constraints are broken, an error is returned.
     ///
     /// # Arguments
@@ -572,7 +575,7 @@ impl VM {
     /// if the top value on the stack is true.
     /// However, there are restrictions on the argument:
     /// - First, the argument must be an int.
-    /// - Second, the argument must fit in the range 0 and values.len() exclusive.
+    /// - Second, the argument must fit in the range 0 and values.len() inclusive.
     /// If either of these constraints are broken, an error is returned.
     ///
     /// # Arguments
@@ -589,7 +592,7 @@ impl VM {
     /// if the top value on the stack is false.
     /// However, there are restrictions on the argument:
     /// - First, the argument must be an int.
-    /// - Second, the argument must fit in the range 0 and values.len() exclusive.
+    /// - Second, the argument must fit in the range 0 and values.len() inclusive.
     /// If either of these constraints are broken, an error is returned.
     ///
     /// # Arguments
