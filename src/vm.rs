@@ -50,17 +50,28 @@ impl VM {
         })
     }
 
-    /// Updates the VM to use the supplied tokens while maintaining the operand stack.
-    ///
-    /// # Arguments
-    /// `tokens` - The new tokens to use.
-    pub fn with_tokens(&mut self, tokens: VecDeque<Token>) -> Result<(), Error> {
-        self.code = Code::new(tokens)?;
-        self.call_stack.0.clear();
+    /// Creates a VM in REPL mode.
+    pub fn repl() -> Result<VM, Error> {
         let main_frame = Frame::new(0, "main", None);
         let mut call_stack = Stack::new();
         call_stack.push(main_frame);
-        self.call_stack = call_stack;
+        Ok(
+            VM {
+                code: Code::repl(VecDeque::new())?,
+                operand_stack: Stack::new(),
+                call_stack
+            }
+        )
+    }
+
+    /// Loads the given tokens into the VM.
+    /// This function does not change the operand stack or the call stack.
+    /// This function can be used with the REPL mode to help facilitate a proper REPL experience.
+    ///
+    /// # Arguments
+    /// `tokens` - The tokens to load.
+    pub fn load_tokens(&mut self, tokens: VecDeque<Token>) -> Result<(), Error> {
+        self.code = Code::repl(tokens)?;
         Ok(())
     }
 

@@ -65,6 +65,48 @@ impl Code {
         }
     }
 
+    /// This constructs a new Code struct with the specified tokens.
+    /// Internally, the tokens are converted to reference counted values.
+    /// Additionally, the Code struct does not check for a main label and instead starts at the first token.
+    ///
+    /// # Arguments
+    /// `tokens` - The tokens from the lexer.
+    pub fn repl(tokens: VecDeque<Token>) -> Result<Code, Error> {
+        let mut labels = HashMap::new();
+        let mut values = VecDeque::new();
+        let iter = tokens.into_iter().enumerate();
+        let mut label_stack = vec![];
+        for (pos, token) in iter {
+            match &token.kind {
+                TokenKind::Label(name) => {
+                    label_stack.push((pos, token.pos, name.to_owned()));
+                    values.push_back(Rc::new(token.into()));
+                },
+                TokenKind::End => {
+                    match label_stack.pop() {
+                        Some((last_start, last_pos, last_name)) => {
+                            if labels.insert(last_name, (last_start, pos)).is_some() {
+                                return Err(Error::new(ErrorKind::DuplicateLabel, last_pos));
+                            } else {
+                                values.push_back(Rc::new(token.into()));
+                            }
+                        },
+                        None => return Err(Error::new(ErrorKind::EndWithoutLabel, token.pos)),
+                    }
+                },
+                _ => values.push_back(Rc::new(token.into())),
+            };
+        }
+
+        Ok(
+            Code {
+                value_pointer: 0,
+                values,
+                labels,
+            }
+        )
+    }
+
     /// This function updates the value_pointer to have the value of jump_location
     /// if and only if jump_location is a valid index. Note that counting is 0-based.
     ///
