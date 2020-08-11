@@ -2,6 +2,7 @@
 //! In the future, it should maintain labels, constants, and other information about the code.
 //! This Code struct is called internally and should not be called from the outside.
 
+use crate::utils::label::Label;
 use crate::{
     errors::{error::Error, error_kind::ErrorKind},
     tokens::{token::Token, token_kind::TokenKind},
@@ -16,7 +17,7 @@ use std::{
 pub struct Code {
     value_pointer: usize,
     values: VecDeque<Rc<Value>>,
-    labels: HashMap<String, (usize, usize)>,
+    labels: HashMap<String, Label>,
 }
 
 impl Code {
@@ -31,30 +32,25 @@ impl Code {
         let iter = tokens.into_iter().enumerate();
         let mut label_stack = vec![];
         for (pos, token) in iter {
-            match &token.kind {
-                TokenKind::Label(name, _) => {
-                    label_stack.push((pos, token.pos, name.to_owned()));
-                    values.push_back(Rc::new(token.into()));
-                },
-                TokenKind::End => {
-                    match label_stack.pop() {
-                        Some((last_start, last_pos, last_name)) => {
-                            if labels.insert(last_name, (last_start, pos)).is_some() {
-                                return Err(Error::new(ErrorKind::DuplicateLabel, last_pos));
-                            } else {
-                                values.push_back(Rc::new(token.into()));
-                            }
-                        },
-                        None => return Err(Error::new(ErrorKind::EndWithoutLabel, token.pos)),
+            if let Token { kind: TokenKind::Label(name, parameters), pos: token_position } = &token {
+                label_stack.push((pos, *token_position, name.to_owned(), parameters.to_vec()));
+            } else if let Token { kind: TokenKind::End, pos: token_position } = &token {
+                match label_stack.pop() {
+                    Some((last_start, last_pos, last_name, last_parameters)) => {
+                        if labels.insert(last_name, Label::new(last_start, pos, last_parameters)).is_some() {
+                            return Err(Error::new(ErrorKind::DuplicateLabel, last_pos))
+                        }
                     }
-                },
-                _ => values.push_back(Rc::new(token.into())),
-            };
+                    None => return Err(Error::new(ErrorKind::EndWithoutLabel, *token_position))
+                }
+            }
+
+            values.push_back(Rc::new(token.into()));
         }
 
-        if let Some((_, last_pos, _)) = label_stack.pop() {
+        if let Some((_, last_pos, _, _)) = label_stack.pop() {
             Err(Error::new(ErrorKind::NoEndOfLabel, last_pos))
-        } else if let Some(&(value_pointer, _)) = labels.get(&"main".to_owned()) {
+        } else if let Some(Label { start_pos: value_pointer, .. }) = labels.get(&"main".to_owned()) {
             Ok(Code {
                 value_pointer: value_pointer + 1,
                 values,
@@ -77,25 +73,20 @@ impl Code {
         let iter = tokens.into_iter().enumerate();
         let mut label_stack = vec![];
         for (pos, token) in iter {
-            match &token.kind {
-                TokenKind::Label(name, _) => {
-                    label_stack.push((pos, token.pos, name.to_owned()));
-                    values.push_back(Rc::new(token.into()));
-                },
-                TokenKind::End => {
-                    match label_stack.pop() {
-                        Some((last_start, last_pos, last_name)) => {
-                            if labels.insert(last_name, (last_start, pos)).is_some() {
-                                return Err(Error::new(ErrorKind::DuplicateLabel, last_pos));
-                            } else {
-                                values.push_back(Rc::new(token.into()));
-                            }
-                        },
-                        None => return Err(Error::new(ErrorKind::EndWithoutLabel, token.pos)),
+            if let Token { kind: TokenKind::Label(name, parameters), pos: token_position } = &token {
+                label_stack.push((pos, *token_position, name.to_owned(), parameters.to_vec()));
+            } else if let Token { kind: TokenKind::End, pos: token_position } = &token {
+                match label_stack.pop() {
+                    Some((last_start, last_pos, last_name, last_parameters)) => {
+                        if labels.insert(last_name, Label::new(last_start, pos, last_parameters)).is_some() {
+                            return Err(Error::new(ErrorKind::DuplicateLabel, last_pos))
+                        }
                     }
-                },
-                _ => values.push_back(Rc::new(token.into())),
-            };
+                    None => return Err(Error::new(ErrorKind::EndWithoutLabel, *token_position))
+                }
+            }
+
+            values.push_back(Rc::new(token.into()));
         }
 
         Ok(
@@ -153,9 +144,9 @@ impl Code {
     /// `label_name` - The name of the label.
     /// `pos` - The position where this was needed.
     pub fn set_label_location(&mut self, label_name: &String, pos: usize) -> Result<(usize, usize), Error> {
-        if let Some(&(label_pos_start, label_pos_end)) = self.labels.get(label_name) {
+        if let Some(Label { start_pos: label_pos_start, end_pos: label_pos_end, .. }) = self.labels.get(label_name) {
             self.value_pointer = label_pos_start + 1;
-            Ok((label_pos_start, label_pos_end))
+            Ok((*label_pos_start, *label_pos_end))
         } else {
             Err(Error::new(ErrorKind::UndefinedLabel, pos))
         }
@@ -164,7 +155,7 @@ impl Code {
     /// This function gets the start and end locations of the given label.
     /// This function returns None if the label does not exist.
     pub fn get_label_start_end(&self, label_name: &String) -> Option<(usize, usize)> {
-        self.labels.get(label_name).copied()
+        self.labels.get(label_name).map(|label| (label.start_pos, label.end_pos))
     }
 
     /// This function gets the current value of value pointer.

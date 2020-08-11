@@ -4,7 +4,7 @@
 use crate::utils::parameter::Parameter;
 use std::fmt;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum ValueKind {
     Void,
     Any,

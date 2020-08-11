@@ -8,7 +8,7 @@ use std::fmt;
 /// The Value struct maintains both the position where this value is used and its kind.
 /// Maintaining the position is useful because it can be used to produce good error messages.
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Value {
     pub pos: usize,
     pub kind: ValueKind,

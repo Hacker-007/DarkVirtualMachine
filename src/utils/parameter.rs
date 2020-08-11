@@ -1,6 +1,6 @@
 use crate::values::value::Value;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Parameter {
     pos: usize,
     name: String,

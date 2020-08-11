@@ -1,8 +1,7 @@
 @main
     call test
-    push 2
 end
 
 @test #a #b
-    push 1
+    printn "Hello, World!"
 end
