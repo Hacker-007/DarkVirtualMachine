@@ -1,4 +1,8 @@
 @main
-    push 123
-    
+    call test
+    push 2
+end
+
+@test #a #b
+    push 1
 end

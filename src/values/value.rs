@@ -411,7 +411,7 @@ impl From<Token> for Value {
                 TokenKind::BooleanLiteral(value) => ValueKind::Boolean(value),
                 TokenKind::StringLiteral(value) => ValueKind::String(value),
                 TokenKind::Identifier(name) => ValueKind::Identifier(name),
-                TokenKind::Label(name) => ValueKind::Label(name),
+                TokenKind::Label(name, parameters) => ValueKind::Label(name, parameters),
                 TokenKind::End => ValueKind::End,
 
                 TokenKind::Push => ValueKind::Push,

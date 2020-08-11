@@ -32,7 +32,7 @@ impl Code {
         let mut label_stack = vec![];
         for (pos, token) in iter {
             match &token.kind {
-                TokenKind::Label(name) => {
+                TokenKind::Label(name, _) => {
                     label_stack.push((pos, token.pos, name.to_owned()));
                     values.push_back(Rc::new(token.into()));
                 },
@@ -78,7 +78,7 @@ impl Code {
         let mut label_stack = vec![];
         for (pos, token) in iter {
             match &token.kind {
-                TokenKind::Label(name) => {
+                TokenKind::Label(name, _) => {
                     label_stack.push((pos, token.pos, name.to_owned()));
                     values.push_back(Rc::new(token.into()));
                 },

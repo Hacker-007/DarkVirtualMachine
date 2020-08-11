@@ -1,6 +1,7 @@
 //! The ValueKind enum maintains the various values in the language.
 //! All of the supported values are in this enum. This makes it easy to expand in the future.
 
+use crate::utils::parameter::Parameter;
 use std::fmt;
 
 #[derive(PartialEq)]
@@ -12,7 +13,7 @@ pub enum ValueKind {
     Boolean(bool),
     String(String),
     Identifier(String),
-    Label(String),
+    Label(String, Vec<Parameter>),
     End,
 
     Push,
@@ -51,7 +52,7 @@ impl ValueKind {
             ValueKind::Boolean(_) => "Boolean",
             ValueKind::String(_) => "String",
             ValueKind::Identifier(_) => "Identifier",
-            ValueKind::Label(_) => "Label",
+            ValueKind::Label(_, _) => "Label",
             ValueKind::End => "End",
             ValueKind::Push => "Instruction Push",
             ValueKind::Pop => "Instruction Pop",
@@ -89,7 +90,7 @@ impl fmt::Debug for ValueKind {
             ValueKind::Boolean(value) => write!(f, "{}", value),
             ValueKind::String(value) => write!(f, "{}", value),
             ValueKind::Identifier(name) => write!(f, "Identifier '{}'", name),
-            ValueKind::Label(name) => write!(f, "Label '{}'", name),
+            ValueKind::Label(name, parameters) => write!(f, "Label '{}' => {:?}", name, parameters),
             ValueKind::End => write!(f, "End"),
             ValueKind::Push => write!(f, "<instruction push>"),
             ValueKind::Pop => write!(f, "<instruction pop>"),

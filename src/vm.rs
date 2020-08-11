@@ -116,7 +116,7 @@ impl VM {
                 .unwrap()
                 .find(name, value.pos)
                 .map(Some),
-            ValueKind::Label(_) => {
+            ValueKind::Label(_, _) => {
                 let mut found_end = false;
                 while let Some(value) = self.next() {
                     if let ValueKind::End = value.kind {
@@ -706,7 +706,7 @@ impl VM {
             },
             kind => Err(Error::new(
                 ErrorKind::ValueMismatch(
-                    ValueKind::Label("".to_owned()).get_value_name(),
+                    ValueKind::Label("".to_owned(), vec![]).get_value_name(),
                     kind.get_value_name(),
                 ),
                 arg_pos_1,

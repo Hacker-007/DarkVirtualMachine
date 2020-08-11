@@ -12,9 +12,11 @@
 //! # }
 //! ```
 
+use crate::utils::parameter::Parameter;
 use crate::{
     errors::{error::Error, error_kind::ErrorKind},
     tokens::{token::Token, token_kind::TokenKind},
+    values::{value::Value, value_kinds::ValueKind},
 };
 
 use std::{collections::VecDeque, iter::Peekable, str::Chars};
@@ -186,7 +188,32 @@ impl Lexer {
         if label.is_empty() {
             Err(Error::new(ErrorKind::InvalidLabelName, initial_point))
         } else {
-            Ok(Token::new(TokenKind::Label(label), initial_point))
+            let mut parameters = vec![];
+            while let Some(ch) = iter.peek() {
+                if ch.is_ascii_whitespace() {
+                    self.advance(iter);
+                    continue;
+                } else if ch == &'#' {
+                    self.advance(iter);
+                    parameters.push(self.make_parameter(iter)?);
+                } else {
+                    break;
+                }
+            }
+
+            Ok(Token::new(TokenKind::Label(label, parameters), initial_point))
+        }
+    }
+
+    fn make_parameter(&mut self, iter: &mut Peekable<Chars>) -> Result<Parameter, Error> {
+        let initial_point = self.current_position;
+        let ch = self.advance(iter);
+        let token = self.make_word(ch, iter);
+        match token.kind {
+            TokenKind::Identifier(ref name) => {
+                Ok(Parameter::new(initial_point, name.to_owned(), Value::new(initial_point, ValueKind::Any)))
+            }
+            _ => Err(Error::new(ErrorKind::InvalidParameterName, token.pos))
         }
     }
 
