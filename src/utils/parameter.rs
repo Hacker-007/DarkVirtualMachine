@@ -1,18 +1,11 @@
-use crate::values::value::Value;
-
 #[derive(Debug, PartialEq, Clone)]
 pub struct Parameter {
-    pos: usize,
-    name: String,
-    value: Value,
+    pub pos: usize,
+    pub name: String,
 }
 
 impl Parameter {
-    pub fn new(pos: usize, name: String, value: Value) -> Parameter {
-        Parameter {
-            pos,
-            name,
-            value,
-        }
+    pub fn new(pos: usize, name: String) -> Parameter {
+        Parameter { pos, name }
     }
 }

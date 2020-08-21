@@ -16,7 +16,6 @@ use crate::utils::parameter::Parameter;
 use crate::{
     errors::{error::Error, error_kind::ErrorKind},
     tokens::{token::Token, token_kind::TokenKind},
-    values::{value::Value, value_kinds::ValueKind},
 };
 
 use std::{collections::VecDeque, iter::Peekable, str::Chars};
@@ -129,7 +128,7 @@ impl Lexer {
             "true" => Token::new(TokenKind::BooleanLiteral(true), initial_point),
             "false" => Token::new(TokenKind::BooleanLiteral(false), initial_point),
             "end" => Token::new(TokenKind::End, initial_point),
-            instr @ _ => {
+            instr => {
                 if let Some(instruction) = TokenKind::is_instruction(instr) {
                     Token::new(instruction, initial_point)
                 } else {
@@ -201,7 +200,10 @@ impl Lexer {
                 }
             }
 
-            Ok(Token::new(TokenKind::Label(label, parameters), initial_point))
+            Ok(Token::new(
+                TokenKind::Label(label, parameters),
+                initial_point,
+            ))
         }
     }
 
@@ -210,10 +212,8 @@ impl Lexer {
         let ch = self.advance(iter);
         let token = self.make_word(ch, iter);
         match token.kind {
-            TokenKind::Identifier(ref name) => {
-                Ok(Parameter::new(initial_point, name.to_owned(), Value::new(initial_point, ValueKind::Any)))
-            }
-            _ => Err(Error::new(ErrorKind::InvalidParameterName, token.pos))
+            TokenKind::Identifier(ref name) => Ok(Parameter::new(initial_point, name.to_owned())),
+            _ => Err(Error::new(ErrorKind::InvalidParameterName, token.pos)),
         }
     }
 

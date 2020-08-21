@@ -1,5 +1,5 @@
+use dark_vm::errors::{error::Error, error_kind::ErrorKind};
 use std::env;
-use dark_vm::errors::{error_kind::ErrorKind, error::Error};
 
 pub struct Arguments {
     path: Option<String>,
@@ -18,7 +18,7 @@ impl Arguments {
 
         for arg in args {
             match arg.as_str() {
-                "-t" |"--show-time" => arguments.show_time = true,
+                "-t" | "--show-time" => arguments.show_time = true,
                 "-m" | "--show-machine" => arguments.show_machine = true,
                 _ if arguments.path.is_none() => arguments.path = Some(arg),
                 _ => return Err(Error::message_only(ErrorKind::UnrecognizedArgument(arg))),

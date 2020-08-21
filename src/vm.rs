@@ -41,11 +41,11 @@ impl VM {
     pub fn new(tokens: VecDeque<Token>) -> Result<VM, Error> {
         let code = Code::new(tokens)?;
         let main_frame = Frame::new(0, "main", None);
-        let mut call_stack = Stack::new();
+        let mut call_stack = Stack::default();
         call_stack.push(main_frame);
         Ok(VM {
             code,
-            operand_stack: Stack::new(),
+            operand_stack: Stack::default(),
             call_stack,
         })
     }
@@ -53,15 +53,13 @@ impl VM {
     /// Creates a VM in REPL mode.
     pub fn repl() -> Result<VM, Error> {
         let main_frame = Frame::new(0, "main", None);
-        let mut call_stack = Stack::new();
+        let mut call_stack = Stack::default();
         call_stack.push(main_frame);
-        Ok(
-            VM {
-                code: Code::repl(VecDeque::new())?,
-                operand_stack: Stack::new(),
-                call_stack
-            }
-        )
+        Ok(VM {
+            code: Code::repl(VecDeque::new())?,
+            operand_stack: Stack::default(),
+            call_stack,
+        })
     }
 
     /// Loads the given tokens into the VM.
@@ -452,7 +450,9 @@ impl VM {
         let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => Ok(Some(Rc::new(operand1.equal(operand2.as_ref(), pos)))),
+            (Some(operand1), Some(operand2)) => {
+                Ok(Some(Rc::new(operand1.equal(operand2.as_ref(), pos))))
+            }
             (None, _) => Err(Error::new(
                 ErrorKind::ValueMismatch(
                     ValueKind::Any.get_value_name(),
@@ -479,7 +479,9 @@ impl VM {
         let (arg_pos_2, arg2) = self.get_arg(1, pos)?;
 
         match (arg1, arg2) {
-            (Some(operand1), Some(operand2)) => Ok(Some(Rc::new(operand1.not_equal(operand2.as_ref(), pos)))),
+            (Some(operand1), Some(operand2)) => {
+                Ok(Some(Rc::new(operand1.not_equal(operand2.as_ref(), pos))))
+            }
             (None, _) => Err(Error::new(
                 ErrorKind::ValueMismatch(
                     ValueKind::Any.get_value_name(),
@@ -686,24 +688,70 @@ impl VM {
     /// # Arguments
     /// `pos` - The position where this instruction was called.
     fn call(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
-        let (arg_pos_1, arg1) = self.get_arg_unevaluated(1, pos)?;
+        let (arg_pos_1, arg1) = self.get_arg_unevaluated(2, pos)?;
         match &arg1.kind {
             ValueKind::Identifier(label_name) => {
                 let caller_pos = self.code.get_current_pos();
-                let (start, end) = self.code.set_label_location(label_name, arg_pos_1)?;
-                let store = self.call_stack.peek().filter(|frame| {
-                    if let Some((cur_start, cur_end)) = self.code.get_label_start_end(&frame.name) {
-                        cur_start < start && end < cur_end
-                    } else {
-                        false
+                let (start, end, parameters) =
+                    self.code.get_label_location(label_name, arg_pos_1)?;
+                let num_parameters = if let (_, Some(value)) = self.get_arg(1, pos)? {
+                    match &value.kind {
+                        ValueKind::Int(value) => *value,
+                        kind => {
+                            return Err(Error::new(
+                                ErrorKind::ValueMismatch(
+                                    ValueKind::Int(0).get_value_name(),
+                                    kind.get_value_name(),
+                                ),
+                                value.pos,
+                            ))
+                        }
                     }
-                }).map(|frame| &frame.current_store);
+                } else {
+                    return Err(Error::new(ErrorKind::ExpectedArgs(1), pos));
+                };
+
+                let mut parameter_values = vec![];
+                for i in 0..num_parameters {
+                    let (pos, parameter_value) =
+                        self.get_arg(num_parameters as usize, arg_pos_1)?;
+                    if let Some(parameter_value) = parameter_value {
+                        parameter_values.push((parameters.get(i as usize).unwrap(), parameter_value));
+                    } else {
+                        return Err(Error::new(
+                            ErrorKind::ValueMismatch(
+                                ValueKind::Any.get_value_name(),
+                                ValueKind::Void.get_value_name(),
+                            ),
+                            pos,
+                        ));
+                    }
+                }
+
+                self.code.set_label_location(label_name, arg_pos_1)?;
+                let store = self
+                    .call_stack
+                    .peek()
+                    .filter(|frame| {
+                        if let Some((cur_start, cur_end)) =
+                            self.code.get_label_start_end(&frame.name)
+                        {
+                            cur_start < start && end < cur_end
+                        } else {
+                            false
+                        }
+                    })
+                    .map(|frame| &frame.current_store);
 
                 let new_frame = Frame::new(caller_pos, label_name, store);
+                for (name, value) in parameter_values {
+                    new_frame.current_store.borrow_mut().define(name, value);
+                }
+                
                 self.call_stack.push(new_frame);
 
                 Ok(None)
-            },
+            }
             kind => Err(Error::new(
                 ErrorKind::ValueMismatch(
                     ValueKind::Label("".to_owned(), vec![]).get_value_name(),

@@ -4,7 +4,7 @@ use crate::utils::parameter::Parameter;
 pub struct Label {
     pub start_pos: usize,
     pub end_pos: usize,
-    parameters: Vec<Parameter>,
+    pub parameters: Vec<Parameter>,
 }
 
 impl Label {

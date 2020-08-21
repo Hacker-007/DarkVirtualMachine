@@ -9,11 +9,6 @@ use std::fmt::Debug;
 pub struct Stack<T: Debug + PartialEq>(pub Vec<T>);
 
 impl<T: Debug + PartialEq> Stack<T> {
-    /// Constructs an empty stack.
-    pub fn new() -> Stack<T> {
-        Stack(vec![])
-    }
-
     /// This function pushes the given value on to the stack.
     ///
     /// # Arguments
@@ -55,5 +50,11 @@ impl<T: Debug + PartialEq> Stack<T> {
     /// This function returns true if there are no elements in the stack.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+}
+
+impl<T: Debug + PartialEq> Default for Stack<T> {
+    fn default() -> Self {
+        Stack(vec![])
     }
 }

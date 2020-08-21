@@ -546,18 +546,18 @@ No value is returned from the set instruction.
 
 **The Call Instruction**
 
-The Call Instruction takes one parameter.
+The Call Instruction takes two parameters, the name of the label to call and the number of parameters to pass.
 
 Example:
 ```
-call greet
+call greet 0
 ```
 
 > The call instruction calls the label passed in. For more information on labels, visit the section dedicated to them.
 
 Example:
 ```
-call greet
+call greet 0
 
 @greet
   printn "Hello, World!"
@@ -588,6 +588,15 @@ end
 Labels have access to the parent scope and local scope. What does that mean?
 Well, if a label is defined inside another label, then the child label has access to all of the variables inside of the parent label.
 Otherwise, it just has access to its own scope. Though the child label can access the parent label, the parent can not access the child.
+
+Labels can also define parameters, although the parameters are not enforced when called.
+In order to define parameters, a hashtag symbol can be placed in front of an identifier as shown below.
+```
+@label_name #a
+end
+```
+
+When labels are called, the parameters can be specified and will be assigned in the same order as they are defined in the label.
 
 **Comments In DarkVM**
 

@@ -1,7 +1,7 @@
 @main
-    call test
+    
 end
 
-@test #a #b
-    printn "Hello, World!"
+@cool #a
+
 end
