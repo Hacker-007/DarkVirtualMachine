@@ -6,3 +6,7 @@ pub mod frames;
 
 /// The store module, which provides a nice wrapper around a HashMap for maintaining variables.
 pub mod store;
+
+pub mod label;
+
+pub mod parameter;

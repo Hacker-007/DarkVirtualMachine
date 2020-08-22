@@ -8,7 +8,7 @@ use std::fmt;
 /// The Value struct maintains both the position where this value is used and its kind.
 /// Maintaining the position is useful because it can be used to produce good error messages.
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Value {
     pub pos: usize,
     pub kind: ValueKind,
@@ -411,7 +411,7 @@ impl From<Token> for Value {
                 TokenKind::BooleanLiteral(value) => ValueKind::Boolean(value),
                 TokenKind::StringLiteral(value) => ValueKind::String(value),
                 TokenKind::Identifier(name) => ValueKind::Identifier(name),
-                TokenKind::Label(name) => ValueKind::Label(name),
+                TokenKind::Label(name, parameters) => ValueKind::Label(name, parameters),
                 TokenKind::End => ValueKind::End,
 
                 TokenKind::Push => ValueKind::Push,

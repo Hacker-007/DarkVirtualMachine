@@ -8,6 +8,7 @@ pub enum ErrorKind {
     UnknownCharacter,
     InvalidNumberFormat,
     InvalidLabelName,
+    InvalidParameterName,
     UnterminatedString,
 
     DuplicateLabel,
@@ -37,6 +38,7 @@ impl Into<String> for ErrorKind {
             ErrorKind::UnknownCharacter => "Unknown Character Found Here.",
             ErrorKind::InvalidNumberFormat => "Invalid Number Format.",
             ErrorKind::InvalidLabelName => "Invalid Label Name.",
+            ErrorKind::InvalidParameterName => "Invalid Parameter Name.",
             ErrorKind::UnterminatedString => "Expected The End Of This String.",
 
             ErrorKind::DuplicateLabel => "Another Label With This Name Was Defined Already.",

@@ -1,4 +1,7 @@
 @main
-    push 123
     
+end
+
+@cool #a
+
 end

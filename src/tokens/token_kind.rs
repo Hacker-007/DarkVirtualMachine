@@ -1,6 +1,8 @@
 //! The TokenKind enum maintains all of the different Tokens that could occur within the program.
 //! Using an enum allows for easy extensibility.
 
+use crate::utils::parameter::Parameter;
+
 #[derive(Debug)]
 pub enum TokenKind {
     Void,
@@ -10,7 +12,7 @@ pub enum TokenKind {
     BooleanLiteral(bool),
     StringLiteral(String),
     Identifier(String),
-    Label(String),
+    Label(String, Vec<Parameter>),
     End,
 
     Push,

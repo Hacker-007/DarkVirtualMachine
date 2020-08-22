@@ -5,7 +5,7 @@ use crate::{
     errors::{error::Error, error_kind::ErrorKind},
     values::value::Value,
 };
-use std::{collections::HashMap, rc::Rc, cell::RefCell};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Debug, PartialEq)]
 pub struct Store {
