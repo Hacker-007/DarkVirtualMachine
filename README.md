@@ -222,6 +222,31 @@ After this instruction, the stack will look like this:
 
 The value returned will be the int 0 because 1 / 2 = 0 with integer division. If float division was used, the result would be 0.5.
 
+**The Mod Instruction**
+
+The Mod instruction takes zero parameters.
+
+Example:
+```
+mod
+```
+
+> The mod instruction removes the top two values from the stack and mods them. It then returns this value.
+
+Example:
+```
+push 4
+push 2
+mod
+```
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+The value returned will be the int 0 because 4 % 2 = 0.
+
 **The Lt Instruction**
 
 The Lt instruction takes two parameters.
@@ -465,6 +490,60 @@ After this instruction, the stack will look like this:
 
 No value is returned from the jmpf instruction.
 
+**The Rjmpt Instruction**
+
+The Rjmpt Instruction takes one parameter.
+
+Example:
+```
+push true
+rjmpt 0
+```
+
+> The rjmpt instruction first checks if the top value on the stack is true. If it is, it checks if the parameter passed is within the bounds of the program, and if it is, it jumps forward or backwards by the parameter specified.
+
+Example:
+```
+push true
+rjmpt 3
+push "Failed"
+push "Succeeded"
+```
+
+After this instruction, the stack will look like this:
+```
+["Succeeded", true]
+```
+
+No value is returned from the rjmpt instruction.
+
+**The Rjmpf Instruction**
+
+The Rjmpf Instruction takes one parameter.
+
+Example:
+```
+push false
+rjmpf 0
+```
+
+> The rjmpf instruction first checks if the top value on the stack is false. If it is, it checks if the parameter passed is within the bounds of the program, and if it is, it jumps forward or backward by the parameter specified.
+
+Example:
+```
+push false
+rjmpf 3
+push "Failed"
+push "Succeeded"
+```
+
+After this instruction, the stack will look like this:
+```
+["Succeeded", false]
+```
+
+No value is returned from the rjmpf instruction.
+
 **The Print Instruction**
 
 The Print Instruction takes one parameter.
@@ -546,18 +625,19 @@ No value is returned from the set instruction.
 
 **The Call Instruction**
 
-The Call Instruction takes two parameters, the name of the label to call and the number of parameters to pass.
+The Call Instruction takes a variable amount of parameters, the name of the label to call and the parameters to pass to the label.
+The number of parameters that the label takes is dependent on how many the label defines.
 
 Example:
 ```
-call greet 0
+call greet
 ```
 
 > The call instruction calls the label passed in. For more information on labels, visit the section dedicated to them.
 
 Example:
 ```
-call greet 0
+call greet
 
 @greet
   printn "Hello, World!"
@@ -566,6 +646,24 @@ end
 
 > In the above example, the code within the greet label is run. So, "Hello, World!" is printed out to the screen.
 > After finishing the code in the label, the code resumes from the point after the function call.
+
+After this instruction, the stack will look like this:
+```
+[]
+```
+
+Example:
+```
+call greet "Revanth"
+
+@greet #name
+  print "Hello, "
+  printn name
+end
+```
+
+> In the above example, the code within the greet label is run. Because the greet label defines one parameter, some value must be added to the call instruction.
+> The value passed in will take the value of name and can be used freely within the label.
 
 After this instruction, the stack will look like this:
 ```

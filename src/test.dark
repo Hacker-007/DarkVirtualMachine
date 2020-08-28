@@ -1,7 +1,13 @@
 @main
-    
+    call cool 1 1
 end
 
-@cool #a
-
+@cool #x #y
+    push x
+    printn peek
+    push y
+    printn peek
+    push add
+    print "Sum: "
+    printn peek
 end

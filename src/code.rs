@@ -151,8 +151,13 @@ impl Code {
         let lower_bound = -(self.value_pointer as i64);
         let upper_bound = self.values.len() as i64;
         if jump_location >= lower_bound && jump_location <= upper_bound {
-            self.value_pointer += jump_location as usize;
-            None
+            if jump_location < 0 {
+                self.value_pointer -= (-jump_location) as usize;
+                None
+            } else {
+                self.value_pointer += jump_location as usize;
+                None
+            }
         } else {
             Some(Error::new(
                 ErrorKind::OutOfBounds(lower_bound as usize, self.values.len()),
