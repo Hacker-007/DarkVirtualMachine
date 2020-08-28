@@ -188,10 +188,37 @@ impl Value {
                     Ok(Value::new(pos, ValueKind::Float(val1 / val2)))
                 }
             }
-
             _ => Err(Error::new(
                 ErrorKind::UnsupportedOperation(
                     "Div".to_owned(),
+                    format!(
+                        "The Value '{}' And The Value '{}'.",
+                        self.kind.get_value_name(),
+                        other.kind.get_value_name()
+                    ),
+                ),
+                pos,
+            )),
+        }
+    }
+
+    /// This function takes the current value and a reference to another value and divides them.
+    /// Note that this function does not take ownership of either value. Instead, it creates a new value.
+    ///
+    /// # Arguments
+    /// `other` - The other value to divide.
+    /// `pos` - The position where this operation was called.
+    pub fn modulus(&self, other: &Value, pos: usize) -> Result<Value, Error> {
+        match (&self.kind, &other.kind) {
+            (ValueKind::Int(val1), ValueKind::Int(val2)) => {
+                Ok(Value::new(pos, ValueKind::Int(val1 % val2)))
+            }
+            (ValueKind::Float(val1), ValueKind::Float(val2)) => {
+                Ok(Value::new(pos, ValueKind::Float(val1 % val2)))
+            }
+            _ => Err(Error::new(
+                ErrorKind::UnsupportedOperation(
+                    "Mod".to_owned(),
                     format!(
                         "The Value '{}' And The Value '{}'.",
                         self.kind.get_value_name(),
@@ -421,6 +448,7 @@ impl From<Token> for Value {
                 TokenKind::Sub => ValueKind::Sub,
                 TokenKind::Mul => ValueKind::Mul,
                 TokenKind::Div => ValueKind::Div,
+                TokenKind::Mod => ValueKind::Mod,
                 TokenKind::LessThan => ValueKind::LessThan,
                 TokenKind::LessThanEqual => ValueKind::LessThanEqual,
                 TokenKind::GreaterThan => ValueKind::GreaterThan,
@@ -431,6 +459,8 @@ impl From<Token> for Value {
                 TokenKind::RelativeJump => ValueKind::RelativeJump,
                 TokenKind::JumpIfTrue => ValueKind::JumpIfTrue,
                 TokenKind::JumpIfFalse => ValueKind::JumpIfFalse,
+                TokenKind::RelativeJumpIfTrue => ValueKind::RelativeJumpIfTrue,
+                TokenKind::RelativeJumpIfFalse => ValueKind::RelativeJumpIfFalse,
                 TokenKind::Print => ValueKind::Print,
                 TokenKind::PrintNewLine => ValueKind::PrintNewLine,
                 TokenKind::Set => ValueKind::Set,

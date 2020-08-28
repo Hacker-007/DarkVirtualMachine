@@ -151,6 +151,7 @@ impl VM {
             ValueKind::Sub => self.sub(value.pos),
             ValueKind::Mul => self.mul(value.pos),
             ValueKind::Div => self.div(value.pos),
+            ValueKind::Mod => self.modulus(value.pos),
             ValueKind::LessThan => self.lt(value.pos),
             ValueKind::LessThanEqual => self.lte(value.pos),
             ValueKind::GreaterThan => self.gt(value.pos),
@@ -161,6 +162,8 @@ impl VM {
             ValueKind::RelativeJump => self.rjmp(value.pos),
             ValueKind::JumpIfTrue => self.jmpt(value.pos),
             ValueKind::JumpIfFalse => self.jmpf(value.pos),
+            ValueKind::RelativeJumpIfTrue => self.rjmpt(value.pos),
+            ValueKind::RelativeJumpIfFalse => self.rjmpf(value.pos),
             ValueKind::Print => self.print(value.pos),
             ValueKind::PrintNewLine => self.printn(value.pos),
             ValueKind::Set => self.set(value.pos),
@@ -307,6 +310,36 @@ impl VM {
         match (arg1, arg2) {
             (Some(operand1), Some(operand2)) => operand1
                 .div(operand2.as_ref(), pos)
+                .map(|val| Some(Rc::new(val))),
+            (None, _) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_1,
+            )),
+            (_, None) => Err(Error::new(
+                ErrorKind::ValueMismatch(
+                    ValueKind::Any.get_value_name(),
+                    ValueKind::Void.get_value_name(),
+                ),
+                arg_pos_2,
+            )),
+        }
+    }
+
+    /// Pops the top two values from the stack and mods them.
+    /// This internally calls both the pop instruction and the modulus method on the Value struct.
+    ///
+    /// # Arguments
+    /// `pos` - The position where the instruction was called.
+    fn modulus(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        let (arg_pos_1, arg1) = self.pop(pos)?;
+        let (arg_pos_2, arg2) = self.pop(pos)?;
+
+        match (arg1, arg2) {
+            (Some(operand1), Some(operand2)) => operand1
+                .modulus(operand2.as_ref(), pos)
                 .map(|val| Some(Rc::new(val))),
             (None, _) => Err(Error::new(
                 ErrorKind::ValueMismatch(
@@ -548,7 +581,7 @@ impl VM {
         match arg1 {
             Some(value) => {
                 if let ValueKind::Int(jump_location) = value.kind {
-                    if let Some(error) = self.code.relative_jump(jump_location, pos) {
+                    if let Some(error) = self.code.relative_jump(jump_location - 1, pos) {
                         Err(error)
                     } else {
                         Ok(None)
@@ -602,6 +635,32 @@ impl VM {
     fn jmpf(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
         match self.operand_stack.peek() {
             Some(value) if !value.is_truthy() => self.jmp(pos),
+            None => Err(Error::new(ErrorKind::EmptyStack, pos)),
+            _ => Ok(None),
+        }
+    }
+
+    /// Changes the instruction pointer in the Code struct by the argument passed in
+    /// if the top value on the stack is true. The constraints are the same are the rjmp instruction.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn rjmpt(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        match self.operand_stack.peek() {
+            Some(value) if value.is_truthy() => self.rjmp(pos),
+            None => Err(Error::new(ErrorKind::EmptyStack, pos)),
+            _ => Ok(None),
+        }
+    }
+
+    //// Changes the instruction pointer in the Code struct by the argument passed in
+    /// if the top value on the stack is false. The constraints are the same are the rjmp instruction.
+    ///
+    /// # Arguments
+    /// `pos` - The position where this instruction was called.
+    fn rjmpf(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
+        match self.operand_stack.peek() {
+            Some(value) if !value.is_truthy() => self.rjmp(pos),
             None => Err(Error::new(ErrorKind::EmptyStack, pos)),
             _ => Ok(None),
         }
@@ -688,33 +747,17 @@ impl VM {
     /// # Arguments
     /// `pos` - The position where this instruction was called.
     fn call(&mut self, pos: usize) -> Result<Option<Rc<Value>>, Error> {
-        let (arg_pos_1, arg1) = self.get_arg_unevaluated(2, pos)?;
+        let (arg_pos_1, arg1) = self.get_arg_unevaluated(1, pos)?;
         match &arg1.kind {
             ValueKind::Identifier(label_name) => {
                 let caller_pos = self.code.get_current_pos();
                 let (start, end, parameters) =
                     self.code.get_label_location(label_name, arg_pos_1)?;
-                let num_parameters = if let (_, Some(value)) = self.get_arg(1, pos)? {
-                    match &value.kind {
-                        ValueKind::Int(value) => *value,
-                        kind => {
-                            return Err(Error::new(
-                                ErrorKind::ValueMismatch(
-                                    ValueKind::Int(0).get_value_name(),
-                                    kind.get_value_name(),
-                                ),
-                                value.pos,
-                            ))
-                        }
-                    }
-                } else {
-                    return Err(Error::new(ErrorKind::ExpectedArgs(1), pos));
-                };
 
                 let mut parameter_values = vec![];
-                for i in 0..num_parameters {
+                for i in 0..parameters.len() {
                     let (pos, parameter_value) =
-                        self.get_arg(num_parameters as usize, arg_pos_1)?;
+                        self.get_arg(parameters.len(), arg_pos_1)?;
                     if let Some(parameter_value) = parameter_value {
                         parameter_values.push((parameters.get(i as usize).unwrap(), parameter_value));
                     } else {
